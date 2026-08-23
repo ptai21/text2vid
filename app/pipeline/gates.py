@@ -23,8 +23,10 @@ from __future__ import annotations
 
 import json
 import re
+from collections.abc import Sequence
 from dataclasses import dataclass
-from typing import Any, Callable
+from pathlib import Path
+from typing import Any, Callable, Protocol
 
 from pydantic import ValidationError
 
@@ -378,6 +380,72 @@ def check_g4(script: Script, concept: ConceptContract) -> GateFailure | None:
                 f"{concept.key}. Stay on the listed beats.",
             )
 
+    return None
+
+
+# ---------------------------------------------------------------------------
+# G5 — audio. SPEC.md §10.
+#
+# Split into two checks because they have opposite remedies, and conflating
+# them produces the single most wasteful failure mode in the pipeline.
+#
+#   G5a integrity  — a file is missing, empty, or the wrong length. That is a
+#                    transient synthesis failure, so re-running TTS fixes it.
+#   G5b duration   — the narration totals 95 seconds. Re-running TTS on the
+#                    same words produces the same 95 seconds, forever. This is
+#                    a *script* problem, so the remedy is the fallback script.
+#
+# G2's word budget is what prevents G5b at source; G5b is the net underneath.
+# ---------------------------------------------------------------------------
+
+MIN_CLIP_S = 2.0
+MAX_CLIP_S = 25.0
+MIN_TOTAL_S = 45.0
+MAX_TOTAL_S = 90.0
+TRAILING_PAD_S = 0.4
+
+
+class AudioClip(Protocol):
+    """Structural: anything carrying a probed clip satisfies this."""
+
+    scene_id: str
+    path: Path
+    duration_s: float
+    size_bytes: int
+
+
+def check_g5a(clips: Sequence[AudioClip]) -> GateFailure | None:
+    """Integrity of each synthesised file. Remedy: retry TTS."""
+    for clip in clips:
+        if not Path(clip.path).is_file():
+            return GateFailure(
+                "G5a", "audio_missing",
+                f"No audio file was produced for scene {clip.scene_id}.",
+            )
+        if clip.size_bytes <= 0:
+            return GateFailure(
+                "G5a", "audio_empty",
+                f"Audio for scene {clip.scene_id} is zero bytes.",
+            )
+        if not MIN_CLIP_S <= clip.duration_s <= MAX_CLIP_S:
+            return GateFailure(
+                "G5a", "clip_duration",
+                f"Audio for scene {clip.scene_id} is {clip.duration_s:.1f}s; each "
+                f"scene must be {MIN_CLIP_S}-{MAX_CLIP_S}s. A clip outside that "
+                "range means synthesis truncated or ran away.",
+            )
+    return None
+
+
+def check_g5b(total_s: float) -> GateFailure | None:
+    """Total narration length. Remedy: the fallback script, not a TTS retry."""
+    if not MIN_TOTAL_S <= total_s <= MAX_TOTAL_S:
+        return GateFailure(
+            "G5b", "total_duration",
+            f"Narration totals {total_s:.1f}s; the video must be "
+            f"{MIN_TOTAL_S}-{MAX_TOTAL_S}s. Re-synthesising the same words cannot "
+            "change this, so the script itself is at fault.",
+        )
     return None
 
 
