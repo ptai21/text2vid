@@ -1,0 +1,53 @@
+{
+  "concept": "covalent_bonds",
+  "scenes": [
+    {
+      "scene_id": "s1",
+      "heading": "Atoms do not stay alone",
+      "narration": "Atoms rarely sit alone. Left by themselves most of them are restless, and joining up with a neighbour is the quickest way out of that restlessness.",
+      "visual": {"type": "title_card", "params": {}}
+    },
+    {
+      "scene_id": "s2",
+      "heading": "Sharing, not giving",
+      "narration": "Neither atom hands an electron over. Instead both push one into the space between them, and that shared pair now counts towards the outer shell of each atom.",
+      "visual": {
+        "type": "atom_pair",
+        "params": {"left": "H", "right": "H", "shared_pairs": 1}
+      }
+    },
+    {
+      "scene_id": "s3",
+      "heading": "Lower energy means stable",
+      "narration": "But why bother at all? Because the joined arrangement sits at lower energy than two lonely atoms, and anything at lower energy is simply more stable.",
+      "visual": {
+        "type": "energy_curve",
+        "params": {"min_distance": 0.74, "label": "Bond length"}
+      }
+    },
+    {
+      "scene_id": "s4",
+      "heading": "The balance point",
+      "narration": "Push the two nuclei too close and they shove each other away. Let them drift apart and the pull fades. The bond settles exactly where those two effects balance.",
+      "visual": {
+        "type": "atom_pair",
+        "params": {"left": "O", "right": "O", "shared_pairs": 2}
+      }
+    },
+    {
+      "scene_id": "s5",
+      "heading": "Where you meet them",
+      "narration": "Water and methane are built this way, and so is the oxygen you are breathing right now. Every one of them is held together by shared electron pairs.",
+      "visual": {
+        "type": "summary_card",
+        "params": {
+          "points": [
+            "Electrons are shared, never given away",
+            "The shared pair fills both outer shells",
+            "Lower energy means a stable arrangement"
+          ]
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,67 @@
+{
+  "concept": "ionic_vs_covalent",
+  "scenes": [
+    {
+      "scene_id": "s1",
+      "heading": "One electron, two outcomes",
+      "narration": "Two atoms can end up stuck together in two quite different ways, and the whole difference comes down to what happens to a single electron between them.",
+      "visual": {"type": "title_card", "params": {}}
+    },
+    {
+      "scene_id": "s2",
+      "heading": "Giving it away",
+      "narration": "In ionic bonding one atom transfers an electron outright to the other. Both walk away charged, and those opposite charges are what holds sodium chloride together.",
+      "visual": {
+        "type": "electron_transfer",
+        "params": {"donor": "Na", "acceptor": "Cl"}
+      }
+    },
+    {
+      "scene_id": "s3",
+      "heading": "Sharing it instead",
+      "narration": "Covalent bonding never transfers anything. Both atoms keep hold of the same shared pair, which is why covalent partners stay as separate molecules rather than a single block.",
+      "visual": {
+        "type": "side_by_side_comparison",
+        "params": {
+          "left_title": "Ionic",
+          "right_title": "Covalent",
+          "rows": [
+            ["Transfers electrons", "Shares electrons"],
+            ["Metal plus nonmetal", "Nonmetal plus nonmetal"]
+          ]
+        }
+      }
+    },
+    {
+      "scene_id": "s4",
+      "heading": "What that changes",
+      "narration": "The consequences show up when you heat them. Ionic solids need enormous heat to melt and then conduct electricity, while covalent molecules melt easily and usually conduct nothing at all.",
+      "visual": {
+        "type": "side_by_side_comparison",
+        "params": {
+          "left_title": "Ionic",
+          "right_title": "Covalent",
+          "rows": [
+            ["High melting point", "Low melting point"],
+            ["Conducts when molten", "Usually does not conduct"]
+          ]
+        }
+      }
+    },
+    {
+      "scene_id": "s5",
+      "heading": "The single difference",
+      "narration": "So one mechanism gives an electron away and the other shares it. Everything else, from what they pair with to how they melt, follows from that one choice.",
+      "visual": {
+        "type": "summary_card",
+        "params": {
+          "points": [
+            "Ionic transfers an electron outright",
+            "Covalent shares an electron pair",
+            "Melting and conducting follow from that"
+          ]
+        }
+      }
+    }
+  ]
+}

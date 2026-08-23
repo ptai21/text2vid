@@ -17,9 +17,12 @@ from app.api import routes
 from app.api.errors import register_handlers
 from app.config import Settings, get_settings
 from app.logging import configure_logging, get_logger
+from app.pipeline.orchestrator import Orchestrator
 from app.pipeline.runner import JobRunner
-from app.pipeline.stub import StubGenerator
 from app.providers import ffmpeg
+from app.providers.llm import GeminiProvider
+from app.providers.tts import EdgeTTSProvider
+from app.providers.visual import MatplotlibProvider
 from app.storage.artifacts import LocalArtifactStore
 from app.storage.repository import InMemoryJobRepository
 
@@ -34,9 +37,16 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     repository = InMemoryJobRepository()
     artifact_store = LocalArtifactStore(settings.artifact_dir)
 
-    # Round 6 swaps StubGenerator for the real orchestrator. Nothing else in
-    # the application needs to change when it does.
-    generate = StubGenerator(artifact_store, settings)
+    # The whole provider boundary, in one block. Swapping Gemini for another
+    # model, edge-tts for Azure, or matplotlib for a generative video API is a
+    # change to these three lines and nothing else in the application (R9).
+    generate = Orchestrator(
+        llm=GeminiProvider(settings),
+        tts=EdgeTTSProvider(settings),
+        visual=lambda context: MatplotlibProvider(settings, context),
+        store=artifact_store,
+        settings=settings,
+    )
 
     runner = JobRunner(
         repository,

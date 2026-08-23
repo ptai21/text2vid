@@ -103,6 +103,10 @@ PH_SCALE = ConceptContract(
                        "tenfold", "ten-fold", "hundredfold"]),
     ],
     allowed_visuals=["title_card", "ph_scale_bar", "log_steps", "summary_card"],
+    # A live run dropped it and produced a video that never showed the
+    # learner what it was answering. CLAUDE.md §4 settles that the query is
+    # shown on the title card, so the card is not the model's choice to make.
+    required_visuals=["title_card"],
     forbidden_topics=["titration", "buffer", "pka"],
     fallback_path=FALLBACK_DIR / "ph_scale.json",
 )
@@ -136,6 +140,7 @@ COVALENT_BONDS = ConceptContract(
                any_of=["stable", "stability", "lower energy", "lower in energy"]),
     ],
     allowed_visuals=["title_card", "atom_pair", "energy_curve", "summary_card"],
+    required_visuals=["title_card"],
     forbidden_topics=["ionic bonding", "hybridis", "molecular orbital"],
     fallback_path=FALLBACK_DIR / "covalent_bonds.json",
 )
@@ -173,7 +178,7 @@ IONIC_VS_COVALENT = ConceptContract(
                      "summary_card"],
     # SPEC.md §6.3: the comparative shape is enforced at the visual layer, not
     # only in prose. Prose can fake a comparison; a required visual cannot.
-    required_visuals=["side_by_side_comparison"],
+    required_visuals=["side_by_side_comparison", "title_card"],
     forbidden_topics=["hybridis", "molecular orbital", "titration"],
     fallback_path=FALLBACK_DIR / "ionic_vs_covalent.json",
 )

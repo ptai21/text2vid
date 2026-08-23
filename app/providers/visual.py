@@ -16,6 +16,7 @@ from __future__ import annotations
 
 import time
 from pathlib import Path
+from typing import Protocol
 
 import matplotlib.pyplot as plt
 
@@ -30,6 +31,21 @@ log = get_logger(__name__)
 
 class RenderError(RuntimeError):
     """Maps to the `render_failed` FailureCode."""
+
+
+class VisualProvider(Protocol):
+    """SPEC.md §11. Swapping to a generative video provider is one new
+    class satisfying this and one line in `main.py` - which is the answer
+    to R9, stated as an interface rather than as a promise.
+
+    `render` returns a *list* of frames even though the matplotlib
+    implementation always returns one. The list is the seam: a provider
+    that emits a frame sequence, or a clip decoded to frames, fits without
+    the pipeline changing shape.
+    """
+
+    def render(self, scene: Scene, duration: float,
+               out_dir: Path) -> list[Path]: ...
 
 
 class MatplotlibProvider:

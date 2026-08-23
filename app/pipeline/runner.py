@@ -19,7 +19,7 @@ from __future__ import annotations
 import asyncio
 from collections.abc import Awaitable, Callable
 
-from app.domain.job import ArtifactRef, Failure, Job, JobStage
+from app.domain.job import ArtifactRef, Failure, FailureCode, Job, JobStage
 from app.domain.state import advance_stage, transition
 from app.logging import get_logger
 from app.storage.repository import JobRepository
@@ -28,6 +28,28 @@ log = get_logger(__name__)
 
 StageReporter = Callable[[JobStage], Awaitable[None]]
 Generator = Callable[[Job, StageReporter], Awaitable[ArtifactRef]]
+
+
+class StageFailure(Exception):
+    """A generator stage failing for a reason it can name.
+
+    Part of the generator contract, which is why it lives beside it. R7
+    asks that failures be named and explicit; the generator is the only
+    layer that knows *which* stage stopped and *why*, so it says so here
+    rather than letting every cause collapse into `internal_error`.
+
+    The catch-all below stays exactly as it was. What it now means is
+    narrower and more useful: an internal_error is a bug, not a
+    foreseeable failure nobody bothered to name.
+    """
+
+    def __init__(self, code: FailureCode, stage: JobStage, message: str,
+                 detail: str = ""):
+        super().__init__(f"{code} at {stage}: {message}")
+        self.code = code
+        self.stage = stage
+        self.message = message
+        self.detail = detail
 
 
 class JobRunner:
@@ -104,6 +126,15 @@ class JobRunner:
                 f"exceeded JOB_TIMEOUT_S={self._timeout_s}",
             )
 
+        except StageFailure as exc:
+            # A foreseen failure that already knows its own name. Logged at
+            # warning rather than exception: there is no bug here and no
+            # traceback worth reading, only a stage that could not proceed.
+            log.warning("job.failed", job_id=job.job_id, code=exc.code,
+                        stage=exc.stage, detail=exc.detail)
+            await self._fail(job, exc.message, exc.detail,
+                             code=exc.code, stage=exc.stage)
+
         except Exception as exc:  # noqa: BLE001 - deliberate catch-all
             # CLAUDE.md §11 forbids swallowing an error without a named
             # FailureCode. This records one and logs the traceback; what it
@@ -118,10 +149,12 @@ class JobRunner:
 
         return report
 
-    async def _fail(self, job: Job, message: str, detail: str) -> None:
+    async def _fail(self, job: Job, message: str, detail: str, *,
+                    code: FailureCode = "internal_error",
+                    stage: JobStage | None = None) -> None:
         failure = Failure(
-            code="internal_error",
-            stage=job.stage or "resolving",
+            code=code,
+            stage=stage or job.stage or "resolving",
             message=message,
             detail=detail,
         )

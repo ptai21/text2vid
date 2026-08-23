@@ -1,0 +1,44 @@
+{
+  "concept": "ph_scale",
+  "scenes": [
+    {
+      "scene_id": "s1",
+      "heading": "Why pH exists",
+      "narration": "Chemists needed one simple number to say how sour or how soapy a liquid is. That number is pH, and it counts something you cannot see.",
+      "visual": {"type": "title_card", "params": {}}
+    },
+    {
+      "scene_id": "s2",
+      "heading": "What pH counts",
+      "narration": "What pH counts is hydrogen ions. The more crowded a solution is with them, the lower its pH reading falls. Fewer hydrogen ions means a higher reading instead.",
+      "visual": {"type": "ph_scale_bar", "params": {"markers": [1.0, 7.0, 13.0]}}
+    },
+    {
+      "scene_id": "s3",
+      "heading": "Reading the scale",
+      "narration": "The scale itself runs from 0 to 14. Exactly 7 sits in the middle and is called neutral. Anything under 7 is acidic, anything over it is basic.",
+      "visual": {"type": "ph_scale_bar", "params": {"markers": [0.0, 7.0, 14.0]}}
+    },
+    {
+      "scene_id": "s4",
+      "heading": "Every step is tenfold",
+      "narration": "Here is the part people miss. The steps are logarithmic, so dropping one whole unit multiplies the hydrogen ions by 10 times over. Three units means a thousandfold jump.",
+      "visual": {"type": "log_steps", "params": {"from_ph": 6, "to_ph": 3}}
+    },
+    {
+      "scene_id": "s5",
+      "heading": "The whole idea",
+      "narration": "So pH is a count of hydrogen ions, 0 to 14, with 7 neutral. Lower is acidic, higher is alkaline, and every single step multiplies by ten.",
+      "visual": {
+        "type": "summary_card",
+        "params": {
+          "points": [
+            "pH counts hydrogen ions in a solution",
+            "0 to 14, with 7 exactly neutral",
+            "Each step is a tenfold change"
+          ]
+        }
+      }
+    }
+  ]
+}
