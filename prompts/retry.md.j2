@@ -1,0 +1,23 @@
+## Your previous attempt was rejected
+
+Check **{{ feedback.gate }}** failed: `{{ feedback.reason }}`.
+
+{{ feedback.detail }}
+
+Fix exactly that. Everything else about the previous script was acceptable, so
+change as little as possible — rewriting the whole thing risks breaking a
+requirement that already passed.
+
+{% if feedback.gate == "G2" -%}
+Word counts are checked mechanically. Count the words in each narration before
+returning, and make the five totals land between 125 and 190.
+{%- elif feedback.gate == "G3" -%}
+The renderer draws only the visual types and parameters listed above. A type
+or parameter outside that list cannot be drawn at all, so this is not a
+stylistic preference.
+{%- elif feedback.gate == "G4" -%}
+This is a content problem, not a formatting one. The JSON was well-formed and
+every visual was valid — what is missing is a point the learner needs in order
+to actually understand the answer. Add it to the scene where it belongs rather
+than appending a sentence at the end.
+{%- endif %}

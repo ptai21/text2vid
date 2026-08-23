@@ -1,0 +1,58 @@
+## The question to answer
+
+{{ concept.canonical_question }}
+
+Answer that question and only that question. It is the one the learner asked.
+
+## Required content
+
+The script must cover all five beats, in this order, one per scene:
+
+{% for beat in concept.beats -%}
+- **{{ beat.id }}** — {{ beat.content }}
+{% endfor %}
+
+{% if concept.narrative_shape == "causal" -%}
+The question asks **why**, not what. Describing what the thing *is* — however
+accurately — answers a different question. Beat B3 is where the "why" lives:
+state plainly that the bonded arrangement is lower in energy, and therefore
+more stable, than the separate atoms. A script without that has not answered
+the question.
+{%- elif concept.narrative_shape == "comparative" -%}
+This is a **comparison**, not two explanations placed side by side. Every
+scene from B1 onwards must address both sides on a single axis: state what
+one does, then what the other does about the same thing. Explaining one type
+fully and then the other is the most common way this goes wrong.
+{%- else -%}
+This is a **linear** explanation: each scene builds on the one before, from
+what the quantity measures through to what it means in practice.
+{%- endif %}
+
+## Phrases that must appear
+
+The script is checked for these. Each requirement is satisfied by any one of
+its terms, so use whichever reads most naturally.
+
+{% for anchor in concept.anchors -%}
+- {{ anchor.name }} — {{ anchor.any_of | join(", ") }}
+{%- if anchor.min_scenes > 1 %} (in at least {{ anchor.min_scenes }} different scenes){% endif %}
+{% endfor %}
+
+## Stay out of
+
+{{ concept.forbidden_topics | join(", ") }}
+
+These are real chemistry, but they are beyond what this learner needs and
+they crowd out the beats above.
+
+## Visual types available
+
+Use only these, and supply exactly the parameters listed.
+
+{% for visual in concept.allowed_visuals -%}
+- `{{ visual }}` — {{ param_docs[visual] }}
+{% endfor %}
+{% if concept.required_visuals %}
+At least one scene **must** use {% for visual in concept.required_visuals %}`{{ visual }}`{% if not loop.last %}, {% endif %}{% endfor %}.
+{% endif %}
+Set `"concept"` to `"{{ concept.key }}"`.
