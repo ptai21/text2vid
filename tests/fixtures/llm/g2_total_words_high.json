@@ -1,0 +1,70 @@
+{
+  "concept": "ph_scale",
+  "scenes": [
+    {
+      "scene_id": "s1",
+      "heading": "What pH measures",
+      "narration": "Every single water based solution that you will ever meet in a school laboratory contains a certain number of hydrogen ions floating around in it, and the pH value is simply the compact number that chemists have agreed to use so that they can record exactly how crowded with those particular hydrogen ions any given sample of that solution really happens to be when you measure it carefully.",
+      "visual": {
+        "type": "title_card",
+        "params": {}
+      }
+    },
+    {
+      "scene_id": "s2",
+      "heading": "The zero to fourteen scale",
+      "narration": "Every single water based solution that you will ever meet in a school laboratory contains a certain number of hydrogen ions floating around in it, and the pH value is simply the compact number that chemists have agreed to use so that they can record exactly how crowded with those particular hydrogen ions any given sample of that solution really happens to be when you measure it carefully.",
+      "visual": {
+        "type": "ph_scale_bar",
+        "params": {
+          "markers": [
+            0.0,
+            7.0,
+            14.0
+          ]
+        }
+      }
+    },
+    {
+      "scene_id": "s3",
+      "heading": "Acidic and basic sides",
+      "narration": "Every single water based solution that you will ever meet in a school laboratory contains a certain number of hydrogen ions floating around in it, and the pH value is simply the compact number that chemists have agreed to use so that they can record exactly how crowded with those particular hydrogen ions any given sample of that solution really happens to be when you measure it carefully.",
+      "visual": {
+        "type": "ph_scale_bar",
+        "params": {
+          "markers": [
+            2.0,
+            7.0,
+            13.0
+          ]
+        }
+      }
+    },
+    {
+      "scene_id": "s4",
+      "heading": "Each step multiplies tenfold",
+      "narration": "Every single water based solution that you will ever meet in a school laboratory contains a certain number of hydrogen ions floating around in it, and the pH value is simply the compact number that chemists have agreed to use so that they can record exactly how crowded with those particular hydrogen ions any given sample of that solution really happens to be when you measure it carefully.",
+      "visual": {
+        "type": "log_steps",
+        "params": {
+          "from_ph": 5,
+          "to_ph": 3
+        }
+      }
+    },
+    {
+      "scene_id": "s5",
+      "heading": "Putting it together",
+      "narration": "Every single water based solution that you will ever meet in a school laboratory contains a certain number of hydrogen ions floating around in it, and the pH value is simply the compact number that chemists have agreed to use so that they can record exactly how crowded with those particular hydrogen ions any given sample of that solution really happens to be when you measure it carefully.",
+      "visual": {
+        "type": "summary_card",
+        "params": {
+          "points": [
+            "Hydrogen ions",
+            "7 is neutral"
+          ]
+        }
+      }
+    }
+  ]
+}

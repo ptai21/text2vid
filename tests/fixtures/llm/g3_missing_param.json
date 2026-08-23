@@ -1,0 +1,66 @@
+{
+  "concept": "covalent_bonds",
+  "scenes": [
+    {
+      "scene_id": "s1",
+      "heading": "Why atoms share electrons",
+      "narration": "Atoms rarely sit alone. When two of them meet, they can lock together by sharing electrons, and understanding why that sharing happens explains almost every molecule around you right now.",
+      "visual": {
+        "type": "title_card",
+        "params": {}
+      }
+    },
+    {
+      "scene_id": "s2",
+      "heading": "Sharing fills the shell",
+      "narration": "In a covalent bond neither atom gives an electron away. Both contribute, and the shared pair counts for each of them, letting both reach a filled outer shell or octet.",
+      "visual": {
+        "type": "atom_pair",
+        "params": {
+          "left": "H",
+          "right": "H"
+        }
+      }
+    },
+    {
+      "scene_id": "s3",
+      "heading": "Lower energy means stability",
+      "narration": "Here is the real reason. Two separate hydrogen atoms hold more energy than one bonded pair, so the bonded state is lower energy, and lower energy simply means more stable.",
+      "visual": {
+        "type": "energy_curve",
+        "params": {
+          "min_distance": 0.74,
+          "label": "Bond length"
+        }
+      }
+    },
+    {
+      "scene_id": "s4",
+      "heading": "Balancing pull and push",
+      "narration": "Two forces settle the distance. Each nucleus pulls on the shared electron pair, while the two nuclei push each other apart, and the bond length is where that balance rests.",
+      "visual": {
+        "type": "atom_pair",
+        "params": {
+          "left": "O",
+          "right": "H",
+          "shared_pairs": 1
+        }
+      }
+    },
+    {
+      "scene_id": "s5",
+      "heading": "Sharing for stability",
+      "narration": "So atoms form covalent bonds by sharing electrons to complete an outer shell, reaching a lower energy and more stable arrangement, as seen in hydrogen gas, water and methane.",
+      "visual": {
+        "type": "summary_card",
+        "params": {
+          "points": [
+            "Atoms share electron pairs",
+            "Shared pairs fill the outer shell",
+            "Bonded state is lower energy"
+          ]
+        }
+      }
+    }
+  ]
+}

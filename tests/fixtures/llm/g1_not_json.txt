@@ -1,0 +1,8 @@
+Sure! Here is a five-scene script explaining the pH scale for a
+secondary school learner. I have kept each narration around thirty words.
+
+```json
+{
+  "concept": "ph_scale",
+  "scenes": [
+    {"scene_id": "s1", "heading": "What pH measures",

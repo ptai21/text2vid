@@ -1,0 +1,85 @@
+{
+  "concept": "ionic_vs_covalent",
+  "scenes": [
+    {
+      "scene_id": "s1",
+      "heading": "How ionic bonding works",
+      "narration": "Ionic bonding is one of the most important ways that chemical compounds are held together, and understanding it explains a great many everyday materials that you already know.",
+      "visual": {
+        "type": "title_card",
+        "params": {}
+      }
+    },
+    {
+      "scene_id": "s2",
+      "heading": "Metals give electrons away",
+      "narration": "A metal atom holds its outermost electrons loosely, so it can hand one or more of them over to a hungry partner, and it becomes a positively charged particle when it does.",
+      "visual": {
+        "type": "electron_transfer",
+        "params": {
+          "donor": "Na",
+          "acceptor": "Cl"
+        }
+      }
+    },
+    {
+      "scene_id": "s3",
+      "heading": "Building the lattice",
+      "narration": "Once the charges exist, opposite charges pull on each other from every direction at once, so the particles stack into a rigid repeating three dimensional lattice rather than separate units.",
+      "visual": {
+        "type": "side_by_side_comparison",
+        "params": {
+          "left_title": "Before",
+          "right_title": "After",
+          "rows": [
+            [
+              "Neutral metal atom",
+              "Positive particle"
+            ],
+            [
+              "Neutral nonmetal atom",
+              "Negative particle"
+            ]
+          ]
+        }
+      }
+    },
+    {
+      "scene_id": "s4",
+      "heading": "Properties of the lattice",
+      "narration": "That lattice is strong, so these compounds need very high melting points before they break apart, and they only conduct electricity once they are molten or fully dissolved in water.",
+      "visual": {
+        "type": "side_by_side_comparison",
+        "params": {
+          "left_title": "Solid",
+          "right_title": "Molten",
+          "rows": [
+            [
+              "Does not conduct",
+              "Conducts well"
+            ],
+            [
+              "Rigid lattice",
+              "Free particles"
+            ]
+          ]
+        }
+      }
+    },
+    {
+      "scene_id": "s5",
+      "heading": "Ionic bonding recap",
+      "narration": "So an ionic compound like sodium chloride forms when a metal hands its electrons to a nonmetal, charged particles attract from all directions, and the resulting lattice melts at a very high temperature.",
+      "visual": {
+        "type": "summary_card",
+        "params": {
+          "points": [
+            "Metals hand electrons over",
+            "Charged particles form a lattice",
+            "High melting point"
+          ]
+        }
+      }
+    }
+  ]
+}

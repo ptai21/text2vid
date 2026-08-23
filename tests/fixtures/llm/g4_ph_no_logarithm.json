@@ -1,0 +1,74 @@
+{
+  "concept": "ph_scale",
+  "scenes": [
+    {
+      "scene_id": "s1",
+      "heading": "What pH measures",
+      "narration": "Every water based solution contains hydrogen ions, and pH is simply the number we use to record how crowded with those hydrogen ions a particular solution really is.",
+      "visual": {
+        "type": "title_card",
+        "params": {}
+      }
+    },
+    {
+      "scene_id": "s2",
+      "heading": "The zero to fourteen scale",
+      "narration": "The familiar scale runs from 0 up to 14. Pure water sits exactly at 7, and chemists call that midpoint neutral because acid and base effects balance each other perfectly.",
+      "visual": {
+        "type": "ph_scale_bar",
+        "params": {
+          "markers": [
+            0.0,
+            7.0,
+            14.0
+          ]
+        }
+      }
+    },
+    {
+      "scene_id": "s3",
+      "heading": "The acidic side",
+      "narration": "Readings below 7 mean the solution is acidic. Lemon juice sits near 2 and tastes sharp, while vinegar lands close to 3, which is why both of them work well in cooking.",
+      "visual": {
+        "type": "ph_scale_bar",
+        "params": {
+          "markers": [
+            2.0,
+            3.0,
+            7.0
+          ]
+        }
+      }
+    },
+    {
+      "scene_id": "s4",
+      "heading": "The basic side",
+      "narration": "Readings above 7 mean the solution is basic, also called alkaline. Soapy water sits near 10 and feels slippery, while household bleach sits close to 13 and is far stronger.",
+      "visual": {
+        "type": "ph_scale_bar",
+        "params": {
+          "markers": [
+            7.0,
+            10.0,
+            13.0
+          ]
+        }
+      }
+    },
+    {
+      "scene_id": "s5",
+      "heading": "Putting it together",
+      "narration": "So pH counts hydrogen ions on a scale from 0 to 14, where 7 is neutral, anything lower counts as acidic, and anything higher counts as basic or alkaline instead.",
+      "visual": {
+        "type": "summary_card",
+        "params": {
+          "points": [
+            "pH counts hydrogen ions",
+            "7 is neutral",
+            "Lower acidic, higher basic"
+          ]
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,70 @@
+{
+  "concept": "ph_scale",
+  "scenes": [
+    {
+      "scene_id": "s1",
+      "heading": "What pH measures",
+      "narration": "pH records how many hydrogen ions a solution contains.",
+      "visual": {
+        "type": "title_card",
+        "params": {}
+      }
+    },
+    {
+      "scene_id": "s2",
+      "heading": "The scale",
+      "narration": "The scale runs from 0 to 14, and 7 is neutral.",
+      "visual": {
+        "type": "ph_scale_bar",
+        "params": {
+          "markers": [
+            0.0,
+            7.0,
+            14.0
+          ]
+        }
+      }
+    },
+    {
+      "scene_id": "s3",
+      "heading": "Acids and bases",
+      "narration": "Below 7 is acidic. Above 7 is basic, also called alkaline.",
+      "visual": {
+        "type": "ph_scale_bar",
+        "params": {
+          "markers": [
+            2.0,
+            7.0,
+            13.0
+          ]
+        }
+      }
+    },
+    {
+      "scene_id": "s4",
+      "heading": "Tenfold steps",
+      "narration": "The scale is logarithmic, so each step is 10 times.",
+      "visual": {
+        "type": "log_steps",
+        "params": {
+          "from_ph": 5,
+          "to_ph": 3
+        }
+      }
+    },
+    {
+      "scene_id": "s5",
+      "heading": "Summary",
+      "narration": "Hydrogen ions, 7 is neutral, logarithmic steps of 10 times.",
+      "visual": {
+        "type": "summary_card",
+        "params": {
+          "points": [
+            "Hydrogen ions",
+            "7 is neutral"
+          ]
+        }
+      }
+    }
+  ]
+}

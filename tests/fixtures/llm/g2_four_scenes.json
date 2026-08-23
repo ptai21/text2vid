@@ -1,0 +1,56 @@
+{
+  "concept": "ph_scale",
+  "scenes": [
+    {
+      "scene_id": "s1",
+      "heading": "What pH measures",
+      "narration": "Every water based solution contains hydrogen ions, and pH is simply the number chemists use to record how crowded with those hydrogen ions a particular sample of solution really happens to be.",
+      "visual": {
+        "type": "title_card",
+        "params": {}
+      }
+    },
+    {
+      "scene_id": "s2",
+      "heading": "Acidic and basic sides",
+      "narration": "Readings below 7 mean the solution counts as acidic, with lemon juice near 2. Readings above 7 mean it is basic, also called alkaline, with household bleach sitting close to 13 instead.",
+      "visual": {
+        "type": "ph_scale_bar",
+        "params": {
+          "markers": [
+            2.0,
+            7.0,
+            13.0
+          ]
+        }
+      }
+    },
+    {
+      "scene_id": "s3",
+      "heading": "Each step multiplies tenfold",
+      "narration": "Here is the part that matters most of all. The scale is logarithmic, so every single step changes the hydrogen ion concentration by 10 times. Moving from 5 to 3 means a hundredfold jump.",
+      "visual": {
+        "type": "log_steps",
+        "params": {
+          "from_ph": 5,
+          "to_ph": 3
+        }
+      }
+    },
+    {
+      "scene_id": "s4",
+      "heading": "Putting it all together",
+      "narration": "So pH counts hydrogen ions on a 0 to 14 logarithmic scale, where 7 is neutral, anything lower is acidic, anything higher is basic, and each single step is a full 10 times change.",
+      "visual": {
+        "type": "summary_card",
+        "params": {
+          "points": [
+            "pH counts hydrogen ions",
+            "7 is neutral",
+            "Each step is 10 times"
+          ]
+        }
+      }
+    }
+  ]
+}

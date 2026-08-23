@@ -1,0 +1,86 @@
+{
+  "concept": "ph_scale",
+  "scenes": [
+    {
+      "scene_id": "s1",
+      "heading": "What pH measures",
+      "narration": "Every water based solution you meet contains hydrogen ions, and the pH value records how crowded with those particular hydrogen ions a given solution really happens to be.",
+      "visual": {
+        "type": "title_card",
+        "params": {}
+      }
+    },
+    {
+      "scene_id": "s2",
+      "heading": "The zero to fourteen scale",
+      "narration": "The familiar scale runs from 0 all the way up to 14. Pure water sits exactly at 7, and chemists have agreed to call that midpoint neutral.",
+      "visual": {
+        "type": "ph_scale_bar",
+        "params": {
+          "markers": [
+            0.0,
+            7.0,
+            14.0
+          ]
+        }
+      }
+    },
+    {
+      "scene_id": "s3",
+      "heading": "The acidic side",
+      "narration": "Readings below 7 mean that the solution counts as acidic. Lemon juice sits near 2 and tastes sharp, while stomach acid is lower still at roughly 1.",
+      "visual": {
+        "type": "ph_scale_bar",
+        "params": {
+          "markers": [
+            1.0,
+            2.0,
+            7.0
+          ]
+        }
+      }
+    },
+    {
+      "scene_id": "s4",
+      "heading": "The basic side",
+      "narration": "Readings above 7 mean the solution is basic, which is also called alkaline. Soapy water sits near 10 and feels slippery, while household bleach lands close to 13.",
+      "visual": {
+        "type": "ph_scale_bar",
+        "params": {
+          "markers": [
+            7.0,
+            10.0,
+            13.0
+          ]
+        }
+      }
+    },
+    {
+      "scene_id": "s5",
+      "heading": "Each step multiplies tenfold",
+      "narration": "The scale is logarithmic, so every single step along it changes the hydrogen ion concentration by 10 times. Two steps together therefore mean a full hundredfold jump.",
+      "visual": {
+        "type": "log_steps",
+        "params": {
+          "from_ph": 5,
+          "to_ph": 3
+        }
+      }
+    },
+    {
+      "scene_id": "s6",
+      "heading": "Putting it together",
+      "narration": "So pH counts hydrogen ions on a logarithmic scale where 7 is neutral, anything lower counts as acidic, and anything higher counts as basic or alkaline instead.",
+      "visual": {
+        "type": "summary_card",
+        "params": {
+          "points": [
+            "pH counts hydrogen ions",
+            "7 is neutral",
+            "Each step is 10 times"
+          ]
+        }
+      }
+    }
+  ]
+}

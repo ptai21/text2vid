@@ -1,0 +1,68 @@
+{
+  "concept": "covalent_bonds",
+  "scenes": [
+    {
+      "scene_id": "s1",
+      "heading": "What covalent bonds are",
+      "narration": "A covalent bond is one of the main ways that atoms attach to each other. You will find these bonds inside almost every molecule that makes up living things around you.",
+      "visual": {
+        "type": "title_card",
+        "params": {}
+      }
+    },
+    {
+      "scene_id": "s2",
+      "heading": "Electrons in the middle",
+      "narration": "In a covalent bond the two atoms share a pair of electrons. Neither atom hands its electron over completely, so the pair sits in the region between the two nuclei instead.",
+      "visual": {
+        "type": "atom_pair",
+        "params": {
+          "left": "H",
+          "right": "H",
+          "shared_pairs": 1
+        }
+      }
+    },
+    {
+      "scene_id": "s3",
+      "heading": "Counting the outer shell",
+      "narration": "Because the shared pair belongs to both partners at once, each atom can count those electrons toward its own outer shell, which is how the octet requirement gets satisfied here.",
+      "visual": {
+        "type": "atom_pair",
+        "params": {
+          "left": "O",
+          "right": "H",
+          "shared_pairs": 1
+        }
+      }
+    },
+    {
+      "scene_id": "s4",
+      "heading": "Single double and triple",
+      "narration": "Atoms can share more than one pair. Sharing one pair gives a single bond, two shared pairs give a double bond, and three shared pairs give the triple bond found in nitrogen gas.",
+      "visual": {
+        "type": "atom_pair",
+        "params": {
+          "left": "N",
+          "right": "N",
+          "shared_pairs": 3
+        }
+      }
+    },
+    {
+      "scene_id": "s5",
+      "heading": "Covalent bonds recap",
+      "narration": "So a covalent bond means two atoms sharing one or more electron pairs, each counting the shared electrons in its own outer shell, as you see in hydrogen gas, water and methane.",
+      "visual": {
+        "type": "summary_card",
+        "params": {
+          "points": [
+            "Atoms share electron pairs",
+            "Shared pairs fill the outer shell",
+            "Single, double and triple bonds"
+          ]
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,85 @@
+{
+  "concept": "ionic_vs_covalent",
+  "scenes": [
+    {
+      "scene_id": "s1",
+      "heading": "Two ways to bond",
+      "narration": "Chemical bonds come in two main flavours. Ionic bonding and covalent bonding both join atoms together, but they do it by completely different mechanisms, and the results differ sharply.",
+      "visual": {
+        "type": "title_card",
+        "params": {}
+      }
+    },
+    {
+      "scene_id": "s2",
+      "heading": "Transfer versus sharing",
+      "narration": "The core difference is mechanism. Ionic bonding transfers electrons outright from one atom to another, creating charged ions, while covalent bonding shares an electron pair between both partners equally.",
+      "visual": {
+        "type": "electron_transfer",
+        "params": {
+          "donor": "Na",
+          "acceptor": "Cl"
+        }
+      }
+    },
+    {
+      "scene_id": "s3",
+      "heading": "Who bonds with whom",
+      "narration": "Ionic bonding pairs a metal with a nonmetal across a large electronegativity gap, giving a rigid lattice of ions. Covalent bonding joins two nonmetals together into discrete separate molecules.",
+      "visual": {
+        "type": "side_by_side_comparison",
+        "params": {
+          "left_title": "Ionic",
+          "right_title": "Covalent",
+          "rows": [
+            [
+              "Metal + nonmetal",
+              "Nonmetal + nonmetal"
+            ],
+            [
+              "Lattice of ions",
+              "Discrete molecules"
+            ]
+          ]
+        }
+      }
+    },
+    {
+      "scene_id": "s4",
+      "heading": "Melting points and conduction",
+      "narration": "Properties follow directly. Ionic solids need very high melting points and conduct electricity once molten or dissolved, while covalent molecules melt at low temperatures and usually do not conduct.",
+      "visual": {
+        "type": "side_by_side_comparison",
+        "params": {
+          "left_title": "Ionic",
+          "right_title": "Covalent",
+          "rows": [
+            [
+              "High melting point",
+              "Low melting point"
+            ],
+            [
+              "Conducts when molten",
+              "Usually does not conduct"
+            ]
+          ]
+        }
+      }
+    },
+    {
+      "scene_id": "s5",
+      "heading": "One axis two answers",
+      "narration": "Remember the pairing. Sodium chloride transfers electrons and forms an ionic lattice, while water shares electrons and forms covalent molecules, which is why their melting points differ so much.",
+      "visual": {
+        "type": "summary_card",
+        "params": {
+          "points": [
+            "Ionic transfers, covalent shares",
+            "Sodium chloride versus water",
+            "Melting points differ sharply"
+          ]
+        }
+      }
+    }
+  ]
+}

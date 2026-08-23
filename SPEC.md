@@ -346,10 +346,10 @@ Constraints:
 
 | Field | Rule |
 |---|---|
-| `scenes` | 4–6 items |
-| `scene_id` | `s1..s6`, unique, ordered |
+| `scenes` | exactly 5 items |
+| `scene_id` | `s1..s5`, unique, ordered |
 | `heading` | 1–6 words, sentence case |
-| `narration` | 25–60 words; plain prose; no markdown, no bullet chars, no bare formulas that cannot be read aloud (`H₂O` → "water") |
+| `narration` | 25–38 words, 125–190 across the script; plain prose; no markdown, no bullet chars, no bare formulas that cannot be read aloud (`H₂O` → "water") |
 | `visual.type` | must be in the concept's `allowed_visuals` |
 | `visual.params` | must satisfy that type's param schema |
 
@@ -455,7 +455,7 @@ timings; transition to `completed`.
 | Gate | Stage | Checks | On failure |
 |---|---|---|---|
 | **G1** Schema | scripting | Pydantic parse; required fields; types | retry w/ feedback |
-| **G2** Structural | scripting | 4–6 scenes; ids unique/ordered; narration 25–60 words; no markdown; estimated total 45–90s | retry w/ feedback |
+| **G2** Structural | scripting | exactly 5 scenes; ids unique/ordered; narration non-empty and 25–38 words; no markdown; **125–190 words total** | retry w/ feedback |
 | **G3** Renderer contract | scripting | Every `visual.type` ∈ concept's `allowed_visuals`; every param present, correct type, in range | retry w/ feedback |
 | **G4** Concept anchor | scripting | All required anchors present across the script; concept-specific structural rules; no `forbidden_topics` | retry w/ feedback |
 | **G5** Audio | narrating | Each file exists, >0 bytes; per-scene duration 2–25s; total 45–90s | retry TTS, then fail |
