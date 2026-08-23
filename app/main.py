@@ -1,43 +1,29 @@
 """Application assembly and wiring.
 
-Round 1 keeps `/health` here because `app/api/` does not exist yet; round 4
-introduces `app/api/routes.py` and the health route moves behind it with the
-rest of the HTTP surface.
+The only place the concrete implementations are chosen. Everything downstream
+depends on the Protocols in `app/storage/` and the generator signature in
+`app/pipeline/runner.py`, so swapping the in-memory repository for a database
+or the stub generator for the real orchestrator is a change here and nowhere
+else — which is what makes R9's "obvious where a real provider plugs in"
+demonstrable rather than asserted.
 """
 
-import shutil
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 
+from app.api import routes
+from app.api.errors import register_handlers
 from app.config import Settings, get_settings
 from app.logging import configure_logging, get_logger
+from app.pipeline.runner import JobRunner
+from app.pipeline.stub import StubGenerator
+from app.providers import ffmpeg
+from app.storage.artifacts import LocalArtifactStore
+from app.storage.repository import InMemoryJobRepository
 
 log = get_logger(__name__)
-
-
-def ffmpeg_available() -> bool:
-    """Both binaries, not just ffmpeg.
-
-    G5 and G7 depend on `ffprobe` specifically, and installing ffmpeg without
-    ffprobe is a common and confusing failure (SETUP.md §1) — reporting
-    `"ffmpeg": true` on a box that cannot probe would hide it until muxing.
-
-    This is a PATH lookup rather than an ffmpeg invocation, so it does not
-    breach the provider boundary in CLAUDE.md §8. Round 7 creates
-    `app/providers/ffmpeg.py` and this delegates to it.
-    """
-    return shutil.which("ffmpeg") is not None and shutil.which("ffprobe") is not None
-
-
-def queue_depth() -> int:
-    """Jobs waiting on the runner's semaphore.
-
-    Structurally zero until round 4 introduces the runner — reported rather
-    than omitted so the health contract in SPEC.md §5 is stable from the start.
-    """
-    return 0
 
 
 @asynccontextmanager
@@ -45,14 +31,34 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     settings: Settings = get_settings()
     settings.artifact_dir.mkdir(parents=True, exist_ok=True)
 
+    repository = InMemoryJobRepository()
+    artifact_store = LocalArtifactStore(settings.artifact_dir)
+
+    # Round 6 swaps StubGenerator for the real orchestrator. Nothing else in
+    # the application needs to change when it does.
+    generate = StubGenerator(artifact_store, settings)
+
+    runner = JobRunner(
+        repository,
+        generate,
+        max_concurrent=settings.max_concurrent_jobs,
+        timeout_s=settings.job_timeout_s,
+    )
+
+    app.state.repository = repository
+    app.state.artifact_store = artifact_store
+    app.state.runner = runner
+
     log.info(
         "startup",
         model=settings.gemini_model,
         max_concurrent_jobs=settings.max_concurrent_jobs,
         artifact_dir=settings.artifact_dir.as_posix(),
-        ffmpeg=ffmpeg_available(),
+        ffmpeg=ffmpeg.available(),
     )
     yield
+
+    await runner.drain()
     log.info("shutdown")
 
 
@@ -70,14 +76,8 @@ def create_app() -> FastAPI:
         lifespan=lifespan,
     )
 
-    @app.get("/health", tags=["ops"])
-    async def health() -> dict[str, object]:
-        return {
-            "status": "ok",
-            "ffmpeg": ffmpeg_available(),
-            "queue_depth": queue_depth(),
-        }
-
+    register_handlers(app)
+    app.include_router(router=routes.router)
     return app
 
 
