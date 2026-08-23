@@ -24,8 +24,10 @@ code fence, no commentary.
   a person would say, not what a textbook would print.
 - No markdown, no bullet characters, no headings inside the narration.
 - No bare formulas that cannot be read aloud. Write "water", not the formula;
-  "sodium chloride", not the symbol pair. Numbers and the digits of the pH
-  scale are fine — those are spoken naturally.
+  "sodium chloride", not the symbol pair.
+- Write numeric values as digits — "7", not "seven"; "0 to 14", not "zero to
+  fourteen". A speech synthesiser reads digits naturally, and the checks that
+  follow look for the numbers themselves.
 - No stage directions, no "in this scene", no addressing the video itself.
 
 ## Visuals

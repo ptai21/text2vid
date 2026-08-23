@@ -81,7 +81,10 @@ PH_SCALE = ConceptContract(
     ],
     anchors=[
         Anchor(name="hydrogen ions", any_of=["h+", "hydrogen ion"]),
-        Anchor(name="the neutral value 7", any_of=["7"]),
+        # Both forms: a live run wrote "seven" in words, which establishes
+        # the beat perfectly well. Rejecting it would be a false negative
+        # that costs a whole extra LLM call to correct.
+        Anchor(name="the neutral value 7", any_of=["7", "seven"]),
         Anchor(name="neutral", any_of=["neutral"]),
         Anchor(name="the acidic side", any_of=["acidic", "acid"]),
         Anchor(name="the basic side", any_of=["basic", "alkaline"]),
