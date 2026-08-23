@@ -552,7 +552,7 @@ artifacts/{job_id}/
   "cost": {"llm_usd": 0.0011, "tts_usd": 0.0, "total_usd": 0.0011,
            "production_estimate_usd": 0.0181},
   "timings": {"scripting": 4.3, "narrating": 8.7, "rendering": 11.2, "muxing": 4.4},
-  "model": "gemini-2.5-flash-lite",
+  "model": "gemini-3.5-flash-lite",
   "created_at": "..."
 }
 ```
@@ -589,17 +589,24 @@ actually earned.
 
 ## 14. Cost model
 
-Assumptions: ~1,500 input tokens, ~1,000 output tokens per script call, mean 1.3 calls
-per job; ~1,000 characters of narration; ~45s CPU; ~8 MB artifact.
+Assumptions: ~1,500 input tokens and ~1,000 **visible** output tokens per script call,
+mean 1.3 calls per job; ~1,000 characters of narration; ~45s CPU; ~8 MB artifact.
+
+`gemini-3.5-flash-lite` is a thinking model and **thinking tokens are billed at the
+output rate**. They are not visible in the response text, so a cost model that counts
+only `candidates_token_count` under-reports. The range below spans zero thinking to
+one thinking token per visible output token; `scripts/smoke.py` observed ~500 thinking
+tokens against a 17-token prompt, so the upper end is not pessimistic. The harness
+(§15) reports the measured figure, and that is the number the README quotes.
 
 | Item | Dev (free tier) | Production | Basis |
 |---|---|---|---|
-| LLM script | $0 | **$0.0007** | `gemini-2.5-flash-lite` $0.10 / $0.40 per 1M |
+| LLM script | $0 | **$0.0038 – $0.0071** | `gemini-3.5-flash-lite` $0.30 / $2.50 per 1M, thinking billed as output |
 | TTS | $0 | **$0.0160** | Azure Neural TTS $16 per 1M chars |
 | Render + encode | ~$0 | **$0.0005** | ~45s CPU @ $0.04/vCPU-hr |
 | Storage | $0 | **$0.0002/mo** | 8 MB @ $0.023/GB-mo |
 | Egress per view | $0 | **$0.0007** | 8 MB @ $0.09/GB |
-| **Total** | **$0** | **≈ $0.018** | |
+| **Total** | **$0** | **≈ $0.021 – $0.025** | |
 
 **Generative video comparison:** $0.10–0.40 per second × 75s = **$7.50–30 per video**,
 i.e. 400–1600× more. But the stronger argument is not price: those APIs cap at 8–10s
@@ -607,10 +614,14 @@ clips, so one 75s video means 8–10 independently non-deterministic generations
 be stitched and kept stylistically consistent. Programmatic rendering **eliminates** that
 non-determinism source instead of managing it.
 
-**Finding worth reporting: TTS is ~89% of production cost; the LLM is ~4%.** This is
-counter-intuitive and it changes what to optimise. The highest-leverage lever is caching
-narration audio by `hash(text + voice)`, not caching LLM calls. If costs must fall
-further, the move is self-hosted TTS (Piper, Kokoro), not a cheaper LLM.
+**Finding worth reporting: TTS is 65–75% of production cost; the LLM is 18–29%.** The
+highest-leverage lever is still caching narration audio by `hash(text + voice)`, not
+caching LLM calls, and if costs must fall further the move is self-hosted TTS (Piper,
+Kokoro) rather than a cheaper LLM. Note this conclusion survived a 6.25× jump in the
+output token price when the model moved to `gemini-3.5-flash-lite` — but the margin
+narrowed sharply, and thinking tokens are what closed it. On a reasoning-heavy model
+the ranking would flip, which is precisely why the cost model bills thinking tokens
+explicitly instead of trusting a static per-job estimate.
 
 Free-tier caveats to state in the README: Gemini's free tier is Flash/Flash-Lite only at
 roughly 5–15 RPM and ~1,000–1,500 requests/day, and free-tier data may be used to

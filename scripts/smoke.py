@@ -58,7 +58,7 @@ def check_gemini() -> None:
         record("gemini", False, "GEMINI_API_KEY missing from .env")
         return
 
-    model = os.environ.get("GEMINI_MODEL", "gemini-2.5-flash-lite")
+    model = os.environ.get("GEMINI_MODEL", "gemini-3.5-flash-lite")
 
     schema = {
         "type": "object",

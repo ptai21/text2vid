@@ -83,7 +83,7 @@ If the agent believes one is wrong it must **stop and raise it**, not silently d
 | The learner's raw query never enters the prompt as instruction | Blocks prompt injection and stops phrasing variance from moving the content. The query is stored in job metadata and shown on the title card (satisfies R6). |
 | In-memory persistence behind `JobRepository`; local files behind `ArtifactStore` | Permitted by the brief when the boundary is clean. Swapping must be a one-class change. |
 | Pre-committed fallback script per concept | Makes the script stage unable to fail. Always flagged `degraded: true`. |
-| `gemini-2.5-flash-lite` | Cheapest current model; constrained JSON generation does not need more. **Gemini 2.0 Flash was shut down 2026-06-01 — never use that model string.** |
+| `gemini-3.5-flash-lite` | Cheapest current model; constrained JSON generation does not need more. Thinking tokens bill as output tokens, so the cost model must count them (§14). **Gemini 2.0 Flash was shut down 2026-06-01 — never use that model string.** |
 
 ---
 
@@ -112,7 +112,7 @@ Asking costs one message. Silently diverging costs a rebuild.
 | Python | 3.11.8 |
 | Package manager | **`uv` only** — never `pip`, never `python -m venv` |
 | Config | `pydantic-settings` + `.env` — never `os.environ` directly |
-| LLM | `google-genai`, model `gemini-2.5-flash-lite`, structured output |
+| LLM | `google-genai`, model `gemini-3.5-flash-lite`, structured output |
 | TTS | `edge-tts` (free, no API key) |
 | Rendering | `matplotlib` (**Agg backend**) + `ffmpeg` / `ffprobe` |
 | Web | FastAPI + Uvicorn |

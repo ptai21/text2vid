@@ -64,7 +64,7 @@ touch app/__init__.py scripts/__init__.py tests/__init__.py
 
 ```
 GEMINI_API_KEY=
-GEMINI_MODEL=gemini-2.5-flash-lite
+GEMINI_MODEL=gemini-3.5-flash-lite
 TTS_VOICE=en-US-AriaNeural
 TTS_RATE=+0%
 MAX_CONCURRENT_JOBS=2
@@ -131,7 +131,7 @@ uv run python -m scripts.smoke
 Expected:
 
 ```
-[1/4] gemini ......... ok   (gemini-2.5-flash-lite, 0.9s)
+[1/4] gemini ......... ok   (gemini-3.5-flash-lite, 0.9s)
 [2/4] edge-tts ....... ok   (2.4s audio, 18KB)
 [3/4] matplotlib ..... ok   (1280x720 png)
 [4/4] ffmpeg mux ..... ok   (2.5s mp4, video+audio streams)
@@ -226,7 +226,8 @@ wall clock, and it reads well on the recording.
 
 - [ ] `uv run python -m scripts.smoke` — all four green
 - [ ] `google-genai` call signature confirmed against `SPEC.md` §8
-- [ ] `tests/test_gates.py` written and **failing** for the right reason
+- [ ] `tests/test_gates.py` and `tests/test_cost.py` written and **failing** for the
+      right reason
 - [ ] Fixture corpus in `tests/fixtures/llm/` complete
 - [ ] Docs committed (`CLAUDE.md`, `SPEC.md`, `PLAN.md`, tests, fixtures)
 - [ ] `git log` shows those commits timestamped **before** any implementation
@@ -246,7 +247,7 @@ wall clock, and it reads well on the recording.
 | ffmpeg exits 1 with no message | `stderr` discarded | Always capture `stderr`; it becomes `failure.detail` |
 | edge-tts hangs | Unofficial endpoint, no default timeout | Hard 30s timeout + backoff in `TTSProvider` |
 | Gemini 429 | Free-tier rate limit | Space calls; harness must run sequentially |
-| Gemini 404 on model | Stale model string | `gemini-2.5-flash-lite`. **Gemini 2.0 Flash was shut down 2026-06-01** |
+| Gemini 404 on model | Stale model string | `gemini-3.5-flash-lite`. **Gemini 2.0 Flash was shut down 2026-06-01** |
 | mp4 plays silent | Audio stream absent | That is exactly what G7 exists to catch — check ffprobe output |
 | Paths break inside JSON | Windows backslashes | Normalise with `Path.as_posix()` before serialising |
 | Job stuck in `running` | Exception escaped the task | Top-level try/except → `internal_error`; plus `JOB_TIMEOUT_S` |

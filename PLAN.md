@@ -25,6 +25,10 @@ demonstrates nothing about your engineering.
 §10. They need no agent, and having them **red** at the start of round 5 is what makes
 that round worth recording.
 
+`tests/test_cost.py` is pre-written on the same terms, from `SPEC.md` §14. It is pure
+arithmetic with no I/O, and it pins the one thing a cost model on a thinking model gets
+wrong: thinking tokens bill at the output rate and never appear in `response.text`.
+
 ```
 valid_ph.json  valid_covalent.json  valid_comparison.json
 g1_not_json.txt  g1_missing_field.json  g1_wrong_type.json
@@ -212,8 +216,9 @@ theme are not the cut line.
 **Goal** Failure paths proven, `manifest.json` emitted.
 **Touches** `app/pipeline/retry.py`, `app/pipeline/cost.py`, `app/concepts/fallbacks/*`,
 `tests/test_pipeline.py`
+**Do not touch** `tests/test_cost.py` — pre-written (§0.1)
 **Depends on** SPEC §9.1, §12, §14
-**Verify** `uv run pytest tests/test_pipeline.py -q`
+**Verify** `uv run pytest tests/test_pipeline.py tests/test_cost.py -q`
 **Gate** With an always-failing LLM the job still completes with `degraded=true`; retry
 feedback reaches the prompt; `manifest.json` records every gate attempt; cost matches §14
 **Commit** `feat(pipeline): add retry feedback, fallback scripts and run manifest`
