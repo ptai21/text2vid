@@ -14,6 +14,7 @@ from __future__ import annotations
 import json
 import shutil
 import subprocess
+from collections.abc import Sequence
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -116,3 +117,157 @@ def encode_placeholder(
         "-movflags", "+faststart",
         str(out),
     ])
+
+
+# ---------------------------------------------------------------------------
+# Muxing — SPEC.md §9.4
+# ---------------------------------------------------------------------------
+
+CROSSFADE_S = 0.4
+ZOOM_MAX = 1.04
+UPSCALE = 2
+"""The still is scaled up before `zoompan` crops back down to output size.
+
+`zoompan` computes its crop rectangle in whole input pixels. Run at 1:1 the
+4% ramp advances by less than a pixel per frame, so the crop snaps rather than
+glides and the "subtle zoom" reads as a stutter. Zooming a 2x source and
+resampling down is smooth, and costs filter time rather than encode time."""
+
+CRF = 23
+PRESET = "veryfast"
+AUDIO_BITRATE = "128k"
+SAMPLE_RATE = 48000
+LOUDNORM = "loudnorm=I=-16:TP=-1.5:LRA=11"
+
+
+@dataclass(frozen=True)
+class MuxScene:
+    still: Path
+    audio: Path
+    duration_s: float
+    """On-screen duration: measured narration plus the trailing pad."""
+
+
+def still_durations(durations: Sequence[float],
+                    *, crossfade: float = CROSSFADE_S) -> list[float]:
+    """How long each still must be held so the crossfades come out even.
+
+    A crossfade *consumes* time: N stills joined by N-1 transitions of length
+    T run for `sum - (N-1)*T`, not `sum`. Left uncorrected the finished video
+    would be 1.6s shorter than the narration it carries, and every scene after
+    the first would drift out of sync with its own audio.
+
+    Each still after the first is therefore held T longer than its audio. The
+    extra is exactly what the transition eats, so the total lands back on the
+    measured narration length and G7's duration check passes on arithmetic
+    rather than on tolerance.
+    """
+    if not durations:
+        return []
+    return [durations[0]] + [d + crossfade for d in durations[1:]]
+
+
+def xfade_offsets(stills: Sequence[float],
+                  *, crossfade: float = CROSSFADE_S) -> list[float]:
+    """When each transition starts, in the *output* timeline.
+
+    Chained `xfade` offsets accumulate against an output that is already
+    shrinking, hence the `- k*T` term. Combined with `still_durations` above,
+    transition k lands exactly on scene k's trailing silence: the picture has
+    finished changing by the moment the next scene starts speaking.
+    """
+    offsets: list[float] = []
+    running = 0.0
+    for index, duration in enumerate(stills[:-1], start=1):
+        running += duration
+        offsets.append(round(running - index * crossfade, 4))
+    return offsets
+
+
+def _video_chain(index: int, frames: int, width: int, height: int,
+                 fps: int) -> str:
+    ramp = f"1+{ZOOM_MAX - 1:.4f}*on/{max(frames - 1, 1)}"
+    return (
+        f"[{index}:v]"
+        f"scale={width * UPSCALE}:{height * UPSCALE}:flags=bicubic,"
+        f"setsar=1,"
+        f"zoompan=z={ramp}:d=1:x=iw/2-(iw/zoom/2):y=ih/2-(ih/zoom/2)"
+        f":s={width}x{height}:fps={fps},"
+        f"format=yuv420p,settb=AVTB[v{index}]"
+    )
+
+
+def build_filtergraph(scenes: Sequence[MuxScene], *, width: int, height: int,
+                      fps: int, crossfade: float = CROSSFADE_S) -> tuple[str, str]:
+    """Returns the filter description and the label its video output carries."""
+    count = len(scenes)
+    stills = still_durations([s.duration_s for s in scenes], crossfade=crossfade)
+    offsets = xfade_offsets(stills, crossfade=crossfade)
+
+    parts = [
+        _video_chain(index, max(2, round(duration * fps)), width, height, fps)
+        for index, duration in enumerate(stills)
+    ]
+
+    current = "v0"
+    for index, offset in enumerate(offsets, start=1):
+        nxt = f"x{index}"
+        parts.append(
+            f"[{current}][v{index}]"
+            f"xfade=transition=fade:duration={crossfade}:offset={offset}[{nxt}]"
+        )
+        current = nxt
+
+    # Audio inputs follow the stills, so scene k's mp3 is input count+k.
+    for index in range(count):
+        parts.append(
+            f"[{count + index}:a]"
+            f"aformat=sample_rates={SAMPLE_RATE}:channel_layouts=stereo,"
+            f"apad=pad_dur={crossfade}[a{index}]"
+        )
+
+    if count > 1:
+        joined = "".join(f"[a{i}]" for i in range(count))
+        parts.append(f"{joined}concat=n={count}:v=0:a=1[araw]")
+        audio_in = "araw"
+    else:
+        audio_in = "a0"
+
+    parts.append(f"[{audio_in}]{LOUDNORM}[aout]")
+    return ";".join(parts), current
+
+
+def mux(scenes: Sequence[MuxScene], out: Path, *, width: int, height: int,
+        fps: int, crossfade: float = CROSSFADE_S) -> None:
+    """Stills plus narration to a single MP4 — one ffmpeg invocation.
+
+    One process rather than per-scene segments and a concat pass: there is a
+    single exit code and a single stderr to attach to a failure, and no
+    intermediate files to leave behind when it fails.
+    """
+    if not scenes:
+        raise FFmpegError("mux called with no scenes")
+
+    out.parent.mkdir(parents=True, exist_ok=True)
+    stills = still_durations([s.duration_s for s in scenes], crossfade=crossfade)
+
+    args: list[str] = []
+    for scene, duration in zip(scenes, stills):
+        args += ["-loop", "1", "-framerate", str(fps), "-t", f"{duration:.4f}",
+                 "-i", str(scene.still)]
+    for scene in scenes:
+        args += ["-i", str(scene.audio)]
+
+    graph, video_out = build_filtergraph(scenes, width=width, height=height,
+                                         fps=fps, crossfade=crossfade)
+
+    args += [
+        "-filter_complex", graph,
+        "-map", f"[{video_out}]", "-map", "[aout]",
+        "-c:v", "libx264", "-preset", PRESET, "-crf", str(CRF),
+        "-pix_fmt", "yuv420p", "-r", str(fps),
+        "-c:a", "aac", "-b:a", AUDIO_BITRATE, "-ar", str(SAMPLE_RATE),
+        "-movflags", "+faststart",
+        str(out),
+    ]
+    run(args)

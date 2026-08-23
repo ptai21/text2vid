@@ -468,3 +468,122 @@ def run_script_gates(raw: str, concept: ConceptContract) -> ScriptGateResult:
             return ScriptGateResult(ok=False, failure=failure)
 
     return ScriptGateResult(ok=True, script=parsed)
+
+
+# ---------------------------------------------------------------------------
+# G6 — frames. SPEC.md §10.
+#
+# Cheap, and it turns a silent renderer bug into a named failure. matplotlib
+# does not raise when a figure comes out blank or the wrong size; it saves it.
+# Without this gate that file travels all the way to the encoder and surfaces
+# as a strange-looking video rather than as `render_failed` at the stage that
+# caused it.
+# ---------------------------------------------------------------------------
+
+PNG_MAGIC = b"\x89PNG\r\n\x1a\n"
+
+
+def png_size(path: Path) -> tuple[int, int] | None:
+    """Width and height from the IHDR header, or None if this is not a PNG.
+
+    Parsed directly rather than through an image library: the dimensions live
+    in the first 24 bytes, and reading them here avoids making the gate depend
+    on a decoder it would otherwise only use for this one check.
+    """
+    try:
+        with Path(path).open("rb") as handle:
+            header = handle.read(24)
+    except OSError:
+        return None
+
+    if len(header) < 24 or not header.startswith(PNG_MAGIC):
+        return None
+    return int.from_bytes(header[16:20], "big"), int.from_bytes(header[20:24], "big")
+
+
+def check_g6(frames: Sequence[Path], *, expected: int, width: int,
+             height: int) -> GateFailure | None:
+    """Every scene produced exactly one usable frame at the right size."""
+    if len(frames) != expected:
+        return GateFailure(
+            "G6", "frame_count",
+            f"The renderer produced {len(frames)} frames for {expected} scenes.",
+        )
+
+    for frame in frames:
+        path = Path(frame)
+        if not path.is_file() or path.stat().st_size <= 0:
+            return GateFailure(
+                "G6", "frame_missing",
+                f"Frame {path.name} is missing or zero bytes.",
+            )
+
+        size = png_size(path)
+        if size is None:
+            return GateFailure(
+                "G6", "frame_unreadable",
+                f"Frame {path.name} is not a readable PNG.",
+            )
+        if size != (width, height):
+            return GateFailure(
+                "G6", "frame_dimensions",
+                f"Frame {path.name} is {size[0]}x{size[1]}, expected "
+                f"{width}x{height}.",
+            )
+    return None
+
+
+# ---------------------------------------------------------------------------
+# G7 — artifact. SPEC.md §10.
+#
+# The last line of defence against the worst outcome this system can produce:
+# reporting `completed` for a file that is zero bytes, silent, or truncated.
+# Every other gate protects quality; this one protects trust. A learner who
+# opens a broken video believes the service is broken, and an evaluator who
+# does believes the submission is.
+#
+# It is also the only gate that inspects the thing actually delivered rather
+# than an input to it, which is why it re-checks duration that G5b already
+# bounded: G5b measured the plan, G7 measures the product.
+# ---------------------------------------------------------------------------
+
+MIN_ARTIFACT_BYTES = 200 * 1024
+DURATION_TOLERANCE_S = 3.0
+
+
+class ProbedMedia(Protocol):
+    duration_s: float
+    size_bytes: int
+    has_video: bool
+    has_audio: bool
+
+
+def check_g7(probed: ProbedMedia, *, expected_duration_s: float) -> GateFailure | None:
+    if not probed.has_video:
+        return GateFailure(
+            "G7", "artifact_no_video",
+            "The finished file has no video stream.",
+        )
+    if not probed.has_audio:
+        # R5 in one check: narration is not optional, and a silent slideshow
+        # is the specific failure the brief calls out.
+        return GateFailure(
+            "G7", "artifact_no_audio",
+            "The finished file has no audio stream, so the narration is missing.",
+        )
+    if probed.size_bytes < MIN_ARTIFACT_BYTES:
+        return GateFailure(
+            "G7", "artifact_too_small",
+            f"The finished file is {probed.size_bytes} bytes; anything under "
+            f"{MIN_ARTIFACT_BYTES} means the encode was truncated.",
+        )
+
+    drift = abs(probed.duration_s - expected_duration_s)
+    if drift > DURATION_TOLERANCE_S:
+        return GateFailure(
+            "G7", "artifact_duration",
+            f"The finished file runs {probed.duration_s:.1f}s but the narration "
+            f"measured {expected_duration_s:.1f}s, a {drift:.1f}s drift. The "
+            "crossfade arithmetic or the concat is wrong.",
+        )
+    return None

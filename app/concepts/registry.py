@@ -46,6 +46,13 @@ class ConceptContract(BaseModel):
     key: ConceptKey
     canonical_question: str
 
+    title: str
+    """Short display name for the title card (SPEC.md §7).
+
+    Distinct from `canonical_question` on purpose: the title card already shows
+    the learner's own wording, so repeating a question beside it would read as
+    a bug. This is the one line the learner sees that names the topic itself."""
+
     aliases: list[tuple[str, ...]]
     """Resolver phrases. Every term in a tuple must be present for it to match,
     which is what lets one entry mean "mentions both sides"."""
@@ -68,6 +75,7 @@ class ConceptContract(BaseModel):
 
 PH_SCALE = ConceptContract(
     key="ph_scale",
+    title="The pH scale",
     canonical_question="How does the pH scale work?",
     aliases=[("ph scale",), ("ph",), ("hydrogen ion",), ("acidity",),
              ("acids and bases",)],
@@ -101,6 +109,7 @@ PH_SCALE = ConceptContract(
 
 COVALENT_BONDS = ConceptContract(
     key="covalent_bonds",
+    title="Covalent bonding",
     canonical_question="Why do atoms form covalent bonds?",
     aliases=[("covalent bond",), ("covalent bonds",), ("covalent bonding",),
              ("share electrons",), ("sharing electrons",), ("shared electrons",),
@@ -133,6 +142,7 @@ COVALENT_BONDS = ConceptContract(
 
 IONIC_VS_COVALENT = ConceptContract(
     key="ionic_vs_covalent",
+    title="Ionic vs covalent bonding",
     canonical_question="What is the difference between ionic and covalent bonding?",
     aliases=[("ionic", "covalent"), ("ionic vs covalent",),
              ("difference between ionic and covalent",)],
