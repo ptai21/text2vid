@@ -358,20 +358,21 @@ audio (§9).
 
 ### VisualType enum (closed)
 
-| Type | Params | Animated |
+| Type | Params | Motion |
 |---|---|---|
 | `title_card` | — (query + concept title injected by renderer) | no |
-| `ph_scale_bar` | `markers: float[0..14]`, ≤4 | **yes** — marker slides |
+| `ph_scale_bar` | `markers: float[0..14]`, ≤4 | static frame + encoder zoom |
 | `log_steps` | `from_ph: int`, `to_ph: int` | no |
 | `atom_pair` | `left: str`, `right: str`, `shared_pairs: 1..3` | no |
-| `energy_curve` | `min_distance: float`, `label: str` | **yes** — curve draws to minimum |
+| `energy_curve` | `min_distance: float`, `label: str` | static frame + encoder zoom |
 | `electron_transfer` | `donor: str`, `acceptor: str` | no |
 | `side_by_side_comparison` | `left_title`, `right_title`, `rows: [[str,str]]` 2–4 | no |
 | `summary_card` | `points: str[]` 2–4, each ≤10 words | no |
 
-Two animated types, deliberately. Both animate the thing that *is* the explanation — the
-pH marker and the energy minimum — rather than decorating. Every other type is a static
-frame. See §16.
+Every type is a single static frame. The marker position and the energy minimum are
+drawn at their meaningful values rather than animated into them — the picture still
+carries the explanation, it just does not move to get there. Motion is supplied by the
+encoder, uniformly, at no per-scene cost. See §16.
 
 ---
 
@@ -432,14 +433,17 @@ during harness runs and is the highest-leverage cost lever in production (§14).
 deterministic: same input, same pixels. This stage contributes **zero** non-determinism,
 which is the point of choosing programmatic rendering.
 
-Static types emit one frame reused for the scene's duration. Animated types emit
-`round(duration × 30)` frames.
+**One PNG per scene — five `savefig` calls per video.** No frame-by-frame
+rendering anywhere: every frame matplotlib draws is a frame ffmpeg could have
+produced for free, and a full harness pass costs roughly ten minutes this way
+against forty the other. All motion comes from the encoder (§9.4).
 
 Every frame carries the burned-in caption (§13).
 
 ### 9.4 Muxing
 
-Per scene: frames + audio → segment. Then concat with 0.3s crossfades → single MP4.
+Per scene: one still + audio → segment, held for the scene's measured duration with a
+subtle `zoompan` 1.00 → 1.04. Then concat with **0.4s crossfades** → single MP4.
 H.264 `yuv420p`, AAC 128k, 1280×720, 30fps, `loudnorm` applied to the audio track.
 `stderr` is always captured and, on failure, becomes `failure.detail`.
 
@@ -584,9 +588,10 @@ actually earned.
   caption zone. Highest value-per-effort item in this section: it improves perceived
   quality, adds accessibility, and lets an evaluator follow the demo **with the sound
   off**.
-- **0.3s crossfades** between scenes. Hard cuts between static frames read as a
+- **0.4s crossfades** between scenes. Hard cuts between static frames read as a
   slideshow.
-- **Animation on exactly two types** (§7) — the ones where motion carries meaning.
+- **No per-scene animation.** Movement comes from the encoder's crossfades and slow
+  zoom, which cost nothing per scene and apply uniformly to every concept.
 - **`loudnorm` plus 0.4s trailing silence per scene.** Educational narration without
   pauses feels rushed.
 - Output: 1280×720, 30fps, ~800 kbps (flat graphics need no more).
