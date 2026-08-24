@@ -47,6 +47,7 @@ rules are enforced; only looking at the artifact proves the rules are right.**
 | 6 | Two non-JSON lines at startup: uvicorn logged before `lifespan` ran `configure_logging`. | Piping stdout through a JSON parser | Moved into `create_app()` so it runs at import |
 | 7 | `LocalArtifactStore.write_text` was not in the SPEC §12 Protocol, so the stub depended on the concrete class — quietly voiding the "swapping is a one-class change" claim. | Self-review against SPEC | Removed; publishing writes a temp file and calls `put()` |
 | 8 | `ModuleNotFoundError: app.main` reported as an environment problem. It was not — the file had simply never been written. | Reading the traceback instead of the error | Round 1 |
+| 18 | **A race in `GeminiProvider._get_client`.** `generate_script` runs under `asyncio.to_thread` and the runner admits two jobs at once, so on a cold process two threads passed the `self._client is None` check together. Both built a client, one assignment won, and the orphan's `httpx` transport closed on collection — killing the request already in flight on it: `RuntimeError('Cannot send a request, as the client has been closed.')`. | Reading a `manifest.json` **during the demo recording**, then reproducing it: restart the server, fire three jobs at once | Double-checked locking. Red/green proven both ways |
 | 17 | `SPEC.md` §5 promises *"every non-2xx uses one shape"*, but Starlette answers an unknown path and an unrecognised verb **in the router**, before any route function runs. Those two never reached `APIError`, so `GET /nope` returned `{"detail":"Not Found"}` — a second shape, and the one an evaluator hits first by mistyping a URL. | Curling a running server with deliberately wrong requests | One `StarletteHTTPException` handler. The spec sentence is now a parametrised test over all four handlers plus the two the router raises alone |
 
 ### Visual defects — none of which any test could see
@@ -67,7 +68,16 @@ Three of the four most serious problems in this build were invisible to a green
 test suite, and all three were found by looking at something real: a live
 response, a rendered PNG, a `manifest.json`. Bug 17 is the fourth instance and
 the cheapest: 329 tests were green, and one `curl` to a URL that does not exist
-found a promise the spec had made and the code had not kept. `tests/test_contracts.py` (round
+found a promise the spec had made and the code had not kept.
+
+Bug 18 is the fifth and the sharpest. It was found by reading a `manifest.json`
+**on camera**, mid-demo, because `attempts: 2` did not match the story I expected
+— and the reason field said `provider_error`, not a gate. Three things had to be
+true for it to stay hidden this long: the retry loop absorbed it every time, the
+harness runs sequentially by design so nothing ever raced the lazy init, and all
+338 tests used fake providers. The instrument that caught it was the manifest —
+built for observability, not for debugging — which is the argument for emitting
+one at all. `tests/test_contracts.py` (round
 10) exists because of that pattern — it is the only suite that can fail for a
 reason nobody anticipated. It earned its place on its **first run**, producing a
 115-word script that the 15-run harness never saw (open issue 1).
@@ -83,6 +93,7 @@ things, and conflating them is how a correct guard gets deleted.
 | 14 | Asserted `manifest.tokens.llm_calls == 0` on the degraded end-to-end run. | Wrong. The model **answered** three times; it answered with garbage. Tokens are still billed. Only a call that *raises* costs nothing. A degraded job is not a free job. |
 | 15 | `test_contracts.py` asserted every scene comes back with populated `params`. | Wrong. `title_card` declares no params by design — its text is injected by the renderer from `RenderContext`, which is the same mechanism that keeps the learner's query out of the prompt. Scoped the assertion to visuals that actually declare params. |
 | 15b | Fixing the timeout code turned `tests/test_api.py::test_job_timeout_is_enforced` red — it asserted `internal_error`. | **Not** a case of editing a test to make code pass, and worth spelling out because the two look identical from the outside. Round 4 wrote that line because `FailureCode` had no `timeout` member yet, so the runner had nothing else to report; SPEC §3 has always defined `internal_error` as *unhandled*, and a timeout is handled in a named `except` block. The assertion recorded an accident, not a contract. The spec row changed first, then the test. `test_api.py` is round 4's file, not pre-written — checked before editing. |
+| 19 | The first version of the bug-18 test passed **with and without** the fix. | A test that cannot fail is not evidence. `FakeClient.__init__` returned instantly, so the window between the `is None` check and the assignment was too narrow for the GIL to interleave — eight threads, one client built, lock or no lock. Adding a 10ms sleep to the fake constructor (the real one sets up an httpx transport, which genuinely takes time) made it discriminate: **8 clients without the lock, 1 with**. Verified by stashing the fix and re-running, not by reasoning about it. |
 | 16 | `test_contracts.py` asserted a single live response clears every gate. | Flaky by construction. The harness measured ~1 first-attempt rejection in 8, and the design says that is unremarkable. Rewrote it around `resolve_script` — the contract is that the **loop converges**, not that the model is perfect. `degraded is True` is the real alarm. |
 
 ---

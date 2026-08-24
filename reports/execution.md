@@ -5,7 +5,7 @@ came apart. Kept separate from [findings.md](findings.md): that file records
 *defects*, this one records *divergence*. A plan that matched reality perfectly
 would either be a very good plan or a record nobody checked.
 
-Read alongside `git log` — 23 commits, each carrying the command it was gated on
+Read alongside `git log` — 27 commits, each carrying the command it was gated on
 and the output that command produced.
 
 ---
@@ -15,10 +15,10 @@ and the output that command produced.
 | | |
 |---|---|
 | Application | 4,616 lines across `app/` |
-| Tests | 3,369 lines — **338 fast** (~11s, offline, quota-free) + **12 slow** |
+| Tests | 3,369 lines — **339 fast** (~7s, offline, quota-free) + **12 slow** |
 | Scripts | 1,087 lines — `smoke`, `demo`, `render_demo`, `harness` |
 | Documentation | 2,707 lines across 9 files |
-| Commits | 23, Conventional Commits, each with an observed `Gate:`/`Result:` |
+| Commits | 27, Conventional Commits, each with an observed `Gate:`/`Result:` |
 | Deliverables | 3 videos, each with `script.json`, `manifest.json`, `query.txt` |
 
 Every one of the ten rounds completed and was committed. No round failed its
