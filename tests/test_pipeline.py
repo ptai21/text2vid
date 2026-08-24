@@ -13,7 +13,10 @@ from __future__ import annotations
 
 import asyncio
 import json
+import threading
+import time
 from pathlib import Path
+from unittest import mock
 
 import pytest
 
@@ -917,3 +920,57 @@ def test_a_script_with_no_title_card_is_rejected_and_retried():
     assert outcome.degraded is False
     assert llm.feedback[1].reason == "missing_required_visual"
     assert "title_card" in llm.feedback[1].detail
+
+
+# ---------------------------------------------------------------------------
+# GeminiProvider client construction
+# ---------------------------------------------------------------------------
+
+def test_the_gemini_client_is_built_once_when_threads_arrive_together():
+    """A found bug, not an imagined one.
+
+    Three jobs submitted at a freshly started server lost one attempt to
+    `RuntimeError('Cannot send a request, as the client has been closed.')`.
+    Two worker threads passed the `self._client is None` check together, both
+    built a client, and one assignment won; the orphan was collected and
+    closing its transport killed the request already in flight on it.
+
+    `manifest.tokens.llm_calls` read 1 against `attempts` of 2 - the lost
+    attempt never reached the API - and the retry loop absorbed it every
+    time, which is why 30 harness runs and 338 tests never showed it. The
+    harness runs sequentially by design (SPEC.md §15), so nothing ever raced
+    the lazy init.
+    """
+    from google import genai
+
+    from app.providers.llm import GeminiProvider
+
+    built: list[object] = []
+    barrier = threading.Barrier(8)
+
+    class FakeClient:
+        def __init__(self, api_key: str) -> None:
+            # The real constructor sets up an httpx transport, which is slow
+            # enough for another thread to pass the `is None` check while it
+            # runs. Without this sleep the window is too narrow for the GIL to
+            # interleave and the test passes with or without the lock - which
+            # it did, on the first attempt at writing it.
+            time.sleep(0.01)
+            built.append(self)
+
+    provider = GeminiProvider(Settings(gemini_api_key="k"))
+    seen: list[object] = []
+
+    def grab() -> None:
+        barrier.wait()          # release all eight into the check at once
+        seen.append(provider._get_client())
+
+    with mock.patch.object(genai, "Client", FakeClient):
+        threads = [threading.Thread(target=grab) for _ in range(8)]
+        for t in threads:
+            t.start()
+        for t in threads:
+            t.join()
+
+    assert len(built) == 1, f"{len(built)} clients built; the orphans get closed"
+    assert len({id(c) for c in seen}) == 1, "threads got different clients"

@@ -17,6 +17,8 @@ which is what satisfies R6.
 
 from __future__ import annotations
 
+import threading
+
 from collections.abc import Sequence
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -200,12 +202,30 @@ class GeminiProvider:
         self._settings = settings
         self._prompts = prompts or PromptBuilder()
         self._client = None
+        self._client_lock = threading.Lock()
 
     def _get_client(self):
-        if self._client is None:
-            from google import genai
+        """Build the client once, even when two worker threads ask together.
 
-            self._client = genai.Client(api_key=self._settings.gemini_api_key)
+        `generate_script` runs under `asyncio.to_thread` and the runner admits
+        two jobs at a time, so on a cold process two threads reach the `is
+        None` check together, both construct a client, and one assignment
+        wins. The loser is unreferenced, gets collected, and closing its
+        `httpx` transport kills the request still in flight on it -
+        `RuntimeError('Cannot send a request, as the client has been
+        closed.')`. Reproduced three times on a freshly started server; the
+        retry loop absorbed it every time, which is exactly why it went
+        unnoticed. The harness could never surface it: SPEC.md §15 runs it
+        sequentially, so two threads never raced the lazy init.
+        """
+        if self._client is None:
+            with self._client_lock:
+                if self._client is None:
+                    from google import genai
+
+                    self._client = genai.Client(
+                        api_key=self._settings.gemini_api_key
+                    )
         return self._client
 
     def generate_script(
