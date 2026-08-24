@@ -28,7 +28,12 @@ from app.domain.job import Job
 from app.logging import get_logger
 from app.pipeline.runner import JobRunner
 from app.providers import ffmpeg
-from app.storage.artifacts import MANIFEST_NAME, VIDEO_NAME, ArtifactStore
+from app.storage.artifacts import (
+    MANIFEST_NAME,
+    SCRIPT_NAME,
+    VIDEO_NAME,
+    ArtifactStore,
+)
 from app.storage.repository import JobRepository
 
 log = get_logger(__name__)
@@ -153,6 +158,27 @@ async def get_manifest(
     _require_bundle_member(job, store, MANIFEST_NAME)
 
     with store.open(job_id, MANIFEST_NAME) as handle:
+        return Response(content=handle.read(), media_type="application/json")
+
+
+@router.get("/videos/{job_id}/script", tags=["videos"])
+async def get_script(
+    job_id: str,
+    repository: JobRepository = Depends(get_repository),
+    store: ArtifactStore = Depends(get_store),
+) -> Response:
+    """Exactly what the model produced, or the fallback that stood in for it.
+
+    SPEC.md §12 calls `script.json` part of the artifact bundle, but only the
+    video and the manifest were reachable over HTTP - so the one file that
+    shows what the non-deterministic stage actually emitted was the one a
+    client could not read. For a degraded run this is also the only way to see
+    *which* fallback was served.
+    """
+    job = await _load(repository, job_id)
+    _require_bundle_member(job, store, SCRIPT_NAME)
+
+    with store.open(job_id, SCRIPT_NAME) as handle:
         return Response(content=handle.read(), media_type="application/json")
 
 

@@ -84,6 +84,7 @@ uv run python -m scripts.demo --out ./submissions
 | `GET` | `/videos/{job_id}` | Full job: status, stage, attempts, degraded, failure, cost, timings. |
 | `GET` | `/videos/{job_id}/artifact` | The MP4. `409` with current `status`/`stage` if not ready yet. |
 | `GET` | `/videos/{job_id}/manifest` | The run record — gates, tokens, per-stage timings. |
+| `GET` | `/videos/{job_id}/script` | Exactly what the model produced, or the fallback that replaced it. |
 | `GET` | `/concepts` | Supported concepts and their aliases. |
 | `GET` | `/health` | Liveness, ffmpeg presence, queue depth. |
 

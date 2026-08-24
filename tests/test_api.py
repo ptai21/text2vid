@@ -335,7 +335,7 @@ async def test_the_artifact_of_an_unknown_job_is_404(build):
 
 
 # ---------------------------------------------------------------------------
-# GET /videos/{job_id}/manifest, GET /concepts, GET /health
+# GET /videos/{job_id}/manifest, /script, GET /concepts, GET /health
 # ---------------------------------------------------------------------------
 
 async def test_the_manifest_is_served_once_the_job_completes(build):
@@ -359,6 +359,51 @@ async def test_the_manifest_is_409_before_the_job_completes(build):
         await harness.runner.drain()
 
     assert response.status_code == 409
+
+
+async def test_the_script_is_served_once_the_job_completes(build):
+    harness = build(completing())
+    async with harness.client() as client:
+        job_id = (await submit(client)).json()["job_id"]
+        await harness.runner.drain()
+        response = await client.get(f"/videos/{job_id}/script")
+
+    assert response.status_code == 200
+    assert response.json()["concept"] == "ph_scale"
+
+
+async def test_the_script_is_409_before_the_job_completes(build):
+    gate = asyncio.Event()
+    harness = build(completing(gate))
+    async with harness.client() as client:
+        job_id = (await submit(client)).json()["job_id"]
+        response = await client.get(f"/videos/{job_id}/script")
+        gate.set()
+        await harness.runner.drain()
+
+    assert response.status_code == 409
+
+
+async def test_every_bundle_member_is_reachable_over_http(build):
+    """SPEC.md §12 declares three files; all three must be readable.
+
+    The script was the one left out, which meant the output of the only
+    non-deterministic stage in the system was the one thing a client could not
+    inspect - and on a degraded run, the only way to see which fallback was
+    served. `scripts/demo.py` could not assemble a complete submission bundle
+    without reaching past the API onto the local disk.
+    """
+    harness = build(completing())
+    async with harness.client() as client:
+        job_id = (await submit(client)).json()["job_id"]
+        await harness.runner.drain()
+
+        codes = {
+            name: (await client.get(f"/videos/{job_id}/{name}")).status_code
+            for name in ("artifact", "manifest", "script")
+        }
+
+    assert codes == {"artifact": 200, "manifest": 200, "script": 200}
 
 
 async def test_the_concepts_endpoint_exposes_the_registry(build):

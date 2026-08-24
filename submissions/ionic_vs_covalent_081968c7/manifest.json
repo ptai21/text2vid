@@ -1,0 +1,92 @@
+{
+  "job_id": "081968c7-f1ef-4e57-ac1a-de453720b71a",
+  "query": "What is the difference between ionic and covalent bonding?",
+  "concept": "ionic_vs_covalent",
+  "degraded": false,
+  "attempts": 1,
+  "gates": [
+    {
+      "gate": "G1",
+      "passed": true,
+      "attempt": 1
+    },
+    {
+      "gate": "G2",
+      "passed": true,
+      "attempt": 1
+    },
+    {
+      "gate": "G3",
+      "passed": true,
+      "attempt": 1
+    },
+    {
+      "gate": "G4",
+      "passed": true,
+      "attempt": 1
+    }
+  ],
+  "scenes": [
+    {
+      "scene_id": "s1",
+      "visual": "title_card",
+      "audio_s": 14.45,
+      "frames": 445,
+      "cached_audio": false
+    },
+    {
+      "scene_id": "s2",
+      "visual": "side_by_side_comparison",
+      "audio_s": 13.92,
+      "frames": 442,
+      "cached_audio": false
+    },
+    {
+      "scene_id": "s3",
+      "visual": "side_by_side_comparison",
+      "audio_s": 14.4,
+      "frames": 456,
+      "cached_audio": false
+    },
+    {
+      "scene_id": "s4",
+      "visual": "side_by_side_comparison",
+      "audio_s": 14.66,
+      "frames": 464,
+      "cached_audio": false
+    },
+    {
+      "scene_id": "s5",
+      "visual": "side_by_side_comparison",
+      "audio_s": 14.11,
+      "frames": 447,
+      "cached_audio": false
+    }
+  ],
+  "video": {
+    "duration_s": 73.6,
+    "size_bytes": 1804902,
+    "has_audio": true,
+    "has_video": true
+  },
+  "cost": {
+    "llm_usd": 0.0021983000000000003,
+    "tts_usd": 0.0,
+    "total_usd": 0.0021983000000000003,
+    "production_estimate_usd": 0.020846299999999998
+  },
+  "tokens": {
+    "llm_calls": 1,
+    "prompt": 961,
+    "output": 764,
+    "thinking": 0
+  },
+  "timings": {
+    "scripting": 3.04,
+    "narrating": 11.65,
+    "rendering": 0.65,
+    "muxing": 10.53
+  },
+  "model": "gemini-3.5-flash-lite",
+  "created_at": "2026-08-24T05:40:38.003429+00:00"
+}

@@ -1,0 +1,102 @@
+{
+  "concept": "ionic_vs_covalent",
+  "scenes": [
+    {
+      "scene_id": "s1",
+      "heading": "Two ways atoms bond together",
+      "narration": "Atoms connect by either ionic bonding or covalent bonding. While ionic bonds involve a complete electron transfer from one atom to another, covalent bonds involve atoms that simply share electrons to gain stability.",
+      "visual": {
+        "type": "title_card",
+        "params": {}
+      }
+    },
+    {
+      "scene_id": "s2",
+      "heading": "Which atoms join which way",
+      "narration": "Ionic links usually form between a metal and a non-metal because their pull on electrons is very different. Meanwhile, covalent links typically happen when two non-metals meet, as neither can pull hard enough to steal.",
+      "visual": {
+        "type": "side_by_side_comparison",
+        "params": {
+          "left_title": "Ionic",
+          "right_title": "Covalent",
+          "rows": [
+            [
+              "Metal and non-metal",
+              "Non-metal and non-metal"
+            ],
+            [
+              "Large pull difference",
+              "Similar pull strength"
+            ]
+          ]
+        }
+      }
+    },
+    {
+      "scene_id": "s3",
+      "heading": "Lattices versus separate molecules",
+      "narration": "The transfer creates charged ions that lock into a massive alternating lattice. On the other hand, sharing forms discrete, independent molecules held together as small, separate units rather than a giant crystal structure.",
+      "visual": {
+        "type": "side_by_side_comparison",
+        "params": {
+          "left_title": "Ionic",
+          "right_title": "Covalent",
+          "rows": [
+            [
+              "Giant crystal lattice",
+              "Discrete molecules"
+            ],
+            [
+              "Charged ions",
+              "Neutral groups"
+            ]
+          ]
+        }
+      }
+    },
+    {
+      "scene_id": "s4",
+      "heading": "Melting points and electricity",
+      "narration": "Because those lattice bonds are so strong, ionic substances have a high melting point and conduct electricity when molten or dissolved. Covalent substances have low melting points and typically do not conduct electricity well.",
+      "visual": {
+        "type": "side_by_side_comparison",
+        "params": {
+          "left_title": "Ionic",
+          "right_title": "Covalent",
+          "rows": [
+            [
+              "High melting point",
+              "Low melting point"
+            ],
+            [
+              "Conducts when liquid",
+              "Does not conduct"
+            ]
+          ]
+        }
+      }
+    },
+    {
+      "scene_id": "s5",
+      "heading": "Sodium chloride and water",
+      "narration": "As a worked example, sodium chloride forms an ionic lattice of charged particles. Water forms covalent molecules where hydrogen and oxygen atoms share electrons to create stable, independent units.",
+      "visual": {
+        "type": "side_by_side_comparison",
+        "params": {
+          "left_title": "Ionic Example",
+          "right_title": "Covalent Example",
+          "rows": [
+            [
+              "Sodium chloride",
+              "Water"
+            ],
+            [
+              "Transfer structure",
+              "Shared electrons"
+            ]
+          ]
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,69 @@
+{
+  "concept": "ph_scale",
+  "scenes": [
+    {
+      "scene_id": "s1",
+      "heading": "What pH really measures",
+      "narration": "Chemistry uses the pH scale to measure the concentration of tiny hydrogen ions floating freely in a liquid solution. More ions mean a stronger chemical activity happening right there.",
+      "visual": {
+        "type": "title_card",
+        "params": {}
+      }
+    },
+    {
+      "scene_id": "s2",
+      "heading": "The middle point of seven",
+      "narration": "The entire scale spans cleanly from 0 to 14. Exactly in the middle sits the neutral value 7, where solutions are neither too active nor harmful.",
+      "visual": {
+        "type": "ph_scale_bar",
+        "params": {
+          "markers": [
+            7
+          ]
+        }
+      }
+    },
+    {
+      "scene_id": "s3",
+      "heading": "Acids and bases defined",
+      "narration": "Moving below 7 brings you to the acidic side, filled with sour reactivity. Going above 7 leads to the basic side, which feels soapy and caustic.",
+      "visual": {
+        "type": "ph_scale_bar",
+        "params": {
+          "markers": [
+            2,
+            7,
+            13
+          ]
+        }
+      }
+    },
+    {
+      "scene_id": "s4",
+      "heading": "How each step multiplies",
+      "narration": "Every single step on this scale represents a massive logarithmic shift. Each jump means the concentration multiplies by ten times compared to the step before.",
+      "visual": {
+        "type": "log_steps",
+        "params": {
+          "from_ph": 6,
+          "to_ph": 5
+        }
+      }
+    },
+    {
+      "scene_id": "s5",
+      "heading": "Everyday chemicals in action",
+      "narration": "You can anchor these ideas to real liquids. Lemon juice sits near 2, pure water rests at 7, and strong cleaning bleach reaches all the way to 13.",
+      "visual": {
+        "type": "summary_card",
+        "params": {
+          "points": [
+            "Lemon juice sits near 2",
+            "Pure water rests at 7",
+            "Bleach reaches up to 13"
+          ]
+        }
+      }
+    }
+  ]
+}

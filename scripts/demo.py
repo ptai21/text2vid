@@ -78,6 +78,10 @@ def download(client: httpx.Client, job: dict, out_dir: Path) -> Path:
     (target / "manifest.json").write_text(
         json.dumps(manifest, indent=2), encoding="utf-8"
     )
+    script = client.get(f"/videos/{job_id}/script").json()
+    (target / "script.json").write_text(
+        json.dumps(script, indent=2), encoding="utf-8"
+    )
     (target / "query.txt").write_text(job["query"] + "\n", encoding="utf-8")
 
     return video

@@ -1,0 +1,68 @@
+{
+  "concept": "covalent_bonds",
+  "scenes": [
+    {
+      "scene_id": "s1",
+      "heading": "Sharing electrons between atoms",
+      "narration": "Atoms get close and start sharing electrons with each other, rather than giving them away completely, forming a strong link that holds the two particles tightly together.",
+      "visual": {
+        "type": "title_card",
+        "params": {}
+      }
+    },
+    {
+      "scene_id": "s2",
+      "heading": "Achieving a stable outer shell",
+      "narration": "Every single atom wants a full outer shell because that arrangement is remarkably unreactive and peaceful, so sharing lets them complete their outer shell without losing anything.",
+      "visual": {
+        "type": "atom_pair",
+        "params": {
+          "left": "H",
+          "right": "H",
+          "shared_pairs": 1
+        }
+      }
+    },
+    {
+      "scene_id": "s3",
+      "heading": "Lower energy means greater stability",
+      "narration": "The bonded state sits lower in energy than two separate atoms ever could, and because nature always prefers lower energy, this cozy arrangement provides lasting stability.",
+      "visual": {
+        "type": "energy_curve",
+        "params": {
+          "min_distance": 0.74,
+          "label": "energy minimum"
+        }
+      }
+    },
+    {
+      "scene_id": "s4",
+      "heading": "Balancing forces in the bond",
+      "narration": "Both positive nuclei pull strongly on the shared pair sitting between them, successfully balancing out the natural repulsion between the two positive centres so they stay put.",
+      "visual": {
+        "type": "atom_pair",
+        "params": {
+          "left": "O",
+          "right": "H",
+          "shared_pairs": 1
+        }
+      }
+    },
+    {
+      "scene_id": "s5",
+      "heading": "Molecules like hydrogen and water",
+      "narration": "Hydrogen gas molecules and water molecules both rely on this exact trick, using shared electrons to achieve full shells and low energy states all around us.",
+      "visual": {
+        "type": "summary_card",
+        "params": {
+          "points": [
+            "atoms share electrons",
+            "full outer shells",
+            "lower energy",
+            "forces balance"
+          ]
+        }
+      }
+    }
+  ]
+}

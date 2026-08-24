@@ -194,6 +194,14 @@ Summary = `job_id, query, concept, status, stage, degraded, created_at, duration
 
 `200` the run's `manifest.json` (§12). Observability surface.
 
+### `GET /videos/{job_id}/script`
+
+`200` the run's `script.json` (§12) — exactly what the model produced, or the fallback
+that stood in for it. Same `404`/`409` semantics as the artifact. All three bundle members
+are reachable over HTTP: withholding the script would hide the output of the only
+non-deterministic stage, and on a degraded run it is the only way to see which fallback
+was served.
+
 ### `GET /concepts`
 
 Lists supported concepts with canonical question and aliases. Makes the extension point
