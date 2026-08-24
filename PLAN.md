@@ -246,7 +246,8 @@ sequential; three concepts × five runs lands near twelve minutes.
 ### Round 10 — Deliverables · 35 min
 
 **Goal** Everything the brief asks for, in the shape it asks for.
-**Touches** `README.md`, `ARCHITECTURE.md`, `submissions/`
+**Touches** `README.md`, `ARCHITECTURE.md`, `submissions/`, `tests/test_contracts.py`
+(added by approval: CLAUDE.md §8 names it as the T3 slow suite but no round claimed it)
 **Commit** `docs: add readme, architecture note and submitted runs`
 
 `README.md` — setup · run · API reference · **test instructions** · cost model · what you
