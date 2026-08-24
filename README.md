@@ -12,6 +12,7 @@ bonds**, and **ionic vs covalent bonding**.
 - **Design and boundaries:** [ARCHITECTURE.md](ARCHITECTURE.md)
 - **Measured reliability:** [reports/reliability.md](reports/reliability.md)
 - **Everything that went wrong on the way:** [reports/findings.md](reports/findings.md)
+- **Plan versus what was actually built:** [reports/execution.md](reports/execution.md)
 
 ---
 
@@ -136,16 +137,25 @@ uv run python -m scripts.harness --runs 5                 # the reliability dist
 
 ## Reliability — what was actually measured
 
-Full report: [reports/reliability.md](reports/reliability.md). Fifteen runs, three
-concepts, real Gemini and real edge-tts:
+Full report: [reports/reliability.md](reports/reliability.md). **Two** passes of fifteen
+runs each — three concepts, real Gemini, real edge-tts — reported together because the
+second is the more interesting one:
 
-| | |
-|---|---|
-| Completed | **15 / 15** — 0 failed, 0 degraded |
-| First attempt | 13 / 15. The other 2 were rejected by a gate and recovered on retry |
-| Duration | 53.9 – 78.5s, every run inside the 45–90s window |
-| Cost | $0.0151 – $0.0231 per video (production estimate) |
-| Acceptance criteria | 5 / 5 PASS ([SPEC.md §15](SPEC.md)) |
+| | Pass 1 | Pass 2 | Combined |
+|---|---|---|---|
+| Completed | 15 / 15 | 15 / 15 | **30 / 30** |
+| Failed · degraded | 0 · 0 | 0 · 0 | **0 · 0** |
+| First attempt | 13 / 15 | 9 / 15 | 22 / 30 |
+| Gate rejections absorbed by retry | 2 | 7 | **9** |
+| Duration | 53.9 – 78.5s | 57.0 – 77.3s | all inside 45–90s |
+| Cost per video | $0.0151 – $0.0231 | $0.0156 – $0.0260 | production estimate |
+| Wall time | 14.0 min | 7.8 min | (the zoom came out between them) |
+| Acceptance criteria | 5 / 5 PASS | 5 / 5 PASS | ([SPEC.md §15](SPEC.md)) |
+
+**The pass with the worse first-attempt rate is the better evidence.** Nine rejections,
+nine recoveries, nothing degraded — including one script that needed all three attempts
+and still landed clean. A system that only works when the model behaves is not reliable;
+one that absorbs a 40% first-attempt failure rate without a single learner noticing is.
 
 ### How flaky generation is avoided
 
@@ -203,33 +213,39 @@ three verification runs, expected 63.3 / 60.4 / 68.5s → actual 63.3 / 60.5 / 6
 G7 probes the finished file. `--corrupt` proves it: truncate the encode, drop the audio
 track, or drift the duration, and G7 rejects all three while passing the intact file.
 
-### About the gates that never fired
+### Which gates actually earn their place
 
-Across 15 runs, **G2 rejected 2 scripts and G1, G3 and G4 rejected none.** R8 says a
-guardrail has to earn its place, so the zeroes are reported rather than quietly enjoyed —
-and the case for keeping them is history, not the counter:
+R8 says a guardrail has to justify itself, so here is the count rather than a claim.
+Across 30 harness runs:
 
-- **G3 caught a bug no unit test could.** The Gemini `response_schema` declared `params`
-  as a bare object, and constrained generation emits only *declared* properties — so
-  `params` came back empty on all three live calls. Every fixture already had `params`
-  populated, so the fast suite was green throughout. G3 is the only reason that reached a
-  log instead of a learner.
-- **G4 caught the model writing `"seven"` where the anchor expected `"7"`.**
-- **G2 is the one still firing.** Twice in the harness, both on `ionic_vs_covalent` — a
-  scene outside the 25–38 word range — and both retries succeeded. Then a third case from
-  outside the harness entirely: the first live call in `tests/test_contracts.py` came back
-  at **115 words against the 125 minimum**. Without the retry loop those are three degraded
-  jobs instead of three clean ones, which is the concrete evidence that the retry is
-  load-bearing rather than decorative.
+| Gate | Rejections | Reasons |
+|---|---|---|
+| G1 | 0 | — |
+| G2 | 8 | `total_words` ×4, `narration_length` ×4 |
+| G3 | 1 | `param_out_of_range` |
+| G4 | 0 | — |
 
-That last one is worth its own sentence. Fifteen harness runs never produced a
-`total_words` rejection; the first contract-test run did. It is also the opposite of the
-failure that was anticipated — **the model undershoots the word budget, it does not run
-long.**
+**G2 is the workhorse, and it fires at the floor rather than the ceiling.** The
+anticipated risk was long narration overrunning the 90s ceiling; the actual failure is the
+model writing *short* — 113, 115, 121 words against a 125 minimum, seen in the harness, in
+`tests/test_contracts.py` and in demo runs alike. `MAX_TOTAL_WORDS` is deliberately left
+at 190: narrowing a threshold that has never once bound would be a speculative edit
+dressed as a fix.
 
-A cheap check that prevents an expensive failure is justified even in the runs where it
-sits idle. What would *not* be justified is inferring that from a column of zeroes, so it
-is argued here instead.
+**G3 has now fired in production conditions** — one `param_out_of_range`, a visual whose
+parameters were inside the schema but outside what the renderer can draw. Before that it
+had already caught the worst bug in the build: `response_schema` declared `params` as a
+bare object, constrained generation emits only *declared* properties, and every live call
+returned empty params while all 325 fast tests stayed green, because hand-written fixtures
+always have their params. G3 is the only reason that reached a log instead of a learner.
+
+**G1 and G4 have never fired in a harness run.** The zeroes are reported rather than
+quietly enjoyed. G4 has one catch to its name from development — the model writing
+`"seven"` where the anchor expected `"7"` — and G1's job is to be the thing that never
+fires, because `response_mime_type` makes malformed JSON nearly impossible; if it ever
+does fire, the cause is a config regression, not the model. A cheap check that prevents an
+expensive failure is justified in the runs where it sits idle. What would *not* be
+justified is inferring that from a column of zeroes, so it is argued here instead.
 
 ### One honest asymmetry
 

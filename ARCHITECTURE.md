@@ -37,8 +37,9 @@ background `asyncio.Task` — the client learns about it through `GET /videos/{j
 ### Why `asyncio` and not Celery
 
 The out-of-scope list rules out a broker, but the choice would be the same without it.
-The workload is one CPU-bound stage (ffmpeg — ~35s of a ~46s job when the harness ran,
-11.5s for a rebuilt 63.3s video once the zoom came out) wrapped in two I/O-bound ones. A `Semaphore(2)` bounds the CPU contention that actually matters; a broker would add
+The workload is one CPU-bound stage (ffmpeg — 35.4s of a 46s job while the encoder still
+zoomed, and roughly half a job's 27.6s once it did not) wrapped in two I/O-bound ones. A
+`Semaphore(2)` bounds the CPU contention that actually matters; a broker would add
 a process boundary, a serialisation format and a failure mode without addressing it. What
 a broker *would* buy is durability across restart — and that is listed as a known limit
 rather than pretended away.
@@ -279,7 +280,7 @@ descriptions.
 | **Gemini free-tier data may be used to improve Google's products** | Real. 5–15 RPM and ~1,000–1,500 requests/day besides. Fine for this; not acceptable for real learner data. A paid tier changes the terms, not a line of code |
 | **In-memory jobs are lost on restart** | Accepted, and the reason `JobRepository` is async today |
 | **Single node artifact storage** | Accepted, same seam |
-| **G2's word budget binds at the floor, not the ceiling** | The anticipated risk was the top: 190 words at the slowest observed pace ≈ 89.0s against a 90s ceiling. It never materialised — 15 runs, longest video 78.5s. The real case came from the other end: a live call at **115 words against the 125 minimum**, caught by `tests/test_contracts.py` on its first run. `MAX_TOTAL_WORDS` is **deliberately left at 190** — narrowing a threshold that has never bound would be a speculative edit dressed as a fix |
+| **G2's word budget binds at the floor, not the ceiling** | The anticipated risk was the top: 190 words at the slowest observed pace ≈ 89.0s against a 90s ceiling. It never materialised across 30 runs — longest video 78.5s. The real case is the other end: **four `total_words` rejections, all low** (113, 115, 121 words against a 125 minimum), seen in the harness, in `tests/test_contracts.py` and in demo runs alike. The model writes short. `MAX_TOTAL_WORDS` is **deliberately left at 190** — narrowing a threshold that has never once bound would be a speculative edit dressed as a fix |
 | **Fifteen runs is a distribution, not a guarantee** | Nothing here is proven about a fourth concept, a different model, or sustained load |
 
 ---

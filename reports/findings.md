@@ -5,7 +5,9 @@ every decision that was escalated rather than guessed. Kept because the brief
 grades **AI-agent workflow** — visible planning, verifiable steps, inspected
 output — and a build that never records its own mistakes cannot evidence that.
 
-Covers rounds 1–10.
+Covers rounds 1–10. Divergence from `PLAN.md` — Touches expansions, contract
+changes, things built that no document specified — is recorded separately in
+[execution.md](execution.md).
 
 ---
 
@@ -123,7 +125,7 @@ that no round claimed.
 
 | # | Issue | Severity | Note |
 |---|---|---|---|
-| 1 | **G2's word budget binds at the *floor*, not the ceiling.** The ceiling worry was wrong: across 15 harness runs the longest video was 78.5s against 90s. But the first live call from `test_contracts.py` produced **115 words against the 125 minimum** — `G2/total_words` firing low. | Closed, understood | The model undershoots, it does not run long. `MIN_TOTAL_WORDS` is doing real work and `MAX_TOTAL_WORDS` stays at 190 — narrowing a threshold that has never bound would be a speculative edit dressed as a fix. Note the harness never saw this: 15 runs missed a case the very first contract run hit. |
+| 1 | **G2's word budget binds at the *floor*, not the ceiling.** The ceiling worry was wrong: across 30 harness runs the longest video was 78.5s against 90s and `total_words` never once fired high. It fires low, repeatedly — 113, 115 and 121 words against a 125 minimum, four times in the second harness pass alone. | Closed, understood | The model writes short. `MIN_TOTAL_WORDS` is doing real work; `MAX_TOTAL_WORDS` stays at 190. Worth noting how this was found: harness pass 1 (15 runs) produced **zero** `total_words` rejections, and the very first `test_contracts.py` call produced one. Fifteen runs is a distribution, not a guarantee — pass 2 then produced four. |
 | 2 | `tests/test_contracts.py` has no owning round. | Medium | **Resolved by decision:** built in round 10 as the T3 slow suite. |
 | 11 | ~~**A job timeout reports `internal_error`.**~~ | Closed | `JobRunner` caught `asyncio.TimeoutError` and called `_fail` without a code, taking the `internal_error` default reserved for bugs. The message, detail and log line were all correct — only the machine-readable `code` was wrong, which is why nothing failed. Fixed: `"timeout"` added to `FailureCode`, runner passes it, SPEC §3 row added, one test. Escalated first, since `app/domain/job.py` was outside round 10's Touches. **Found by fact-checking the README against the code**, which is a review pass worth keeping — writing documentation is the only step that reads the whole surface at once. |
 | 3 | Visual polish still wanted. | Low | Deferred by request; no specifics given yet. `render_demo` iterates without touching quota. |
