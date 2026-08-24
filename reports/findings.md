@@ -5,7 +5,7 @@ every decision that was escalated rather than guessed. Kept because the brief
 grades **AI-agent workflow** — visible planning, verifiable steps, inspected
 output — and a build that never records its own mistakes cannot evidence that.
 
-Covers rounds 1–8. Round 9 (harness) and 10 (docs) are not built yet.
+Covers rounds 1–9. Round 10 (docs) is not built yet.
 
 ---
 
@@ -104,14 +104,16 @@ that no round claimed.
 
 | # | Issue | Severity | Note |
 |---|---|---|---|
-| 1 | **G2's word ceiling has ~1s of headroom.** 190 words at the slowest observed pace (131 wpm) is 87.0s + 2.0s of pads = 89.0s against a 90s ceiling. | Medium | Lower bound is fine (≈51s vs a 45s floor). Fix if it bites: `MAX_TOTAL_WORDS` → ~175, not a wider duration window. Live `ionic_vs_covalent` hit 79.6s — the closest so far. |
+| 1 | **G2's word ceiling has ~1s of headroom** — *did not bite.* Across 15 harness runs the longest video was 78.5s against the 90s ceiling, and `G2/total_words` never fired once. | Closed, watch only | The arithmetic worst case (190 words at 131 wpm ≈ 89.0s) is still real, but nothing in 15 runs approached it. `MAX_TOTAL_WORDS` is deliberately **left at 190**: narrowing a threshold that has never bound would be a speculative edit dressed as a fix. |
 | 2 | `tests/test_contracts.py` has no owning round. | Medium | Decide before round 10. |
 | 3 | Visual polish still wanted. | Low | Deferred by request; no specifics given yet. `render_demo` iterates without touching quota. |
 | 4 | Encoding dominates wall time — ~21s of ~28s per job. | Low | A 15-run harness spends ~5 min in ffmpeg alone. `--scripts-only` exists for that reason. |
-| 5 | Thinking tokens were **0** on every live call. | Low | SPEC §14's upper bound may be pessimistic for constrained JSON. Cost model handles both; observed cost $0.0161–$0.0219 already sits at or below the documented band. |
+| 5 | Thinking tokens were **0** on every live call — now across 17 harness calls plus the 4 before it. | Closed | Settled: `gemini-3.5-flash-lite` under a `response_schema` does not think. SPEC §14's upper bound is pessimistic for this workload, and the cost model still bills them correctly if they ever appear. Real spend across all 15 runs: **$0.0317**. |
 | 6 | `edge-tts` is an unofficial endpoint. | Known, accepted | Mitigated by explicit timeout, 3× backoff, sha256 audio cache, and the `TTSProvider` seam. Must be stated in README. |
 | 7 | Gemini free tier: 5–15 RPM, ~1,000–1,500/day, and free-tier data may be used to improve Google's products. | Known, accepted | Fine for a prototype, not for real learner data. Must be stated in README. |
-| 8 | The harness has not been run. | Blocking round 10 | README and ARCHITECTURE must quote real numbers, so the harness runs first. |
+| 8 | ~~The harness has not been run.~~ | Closed | 15 runs, 0 failed, 0 degraded, all 5 SPEC §15 criteria PASS. See `reports/reliability.md`. |
+| 9 | **Encoding is 77% of wall time** — muxing averages 35.4s of a ~46s job (scripting 6.9s, narrating 8.6s, rendering 1.3s). | Low | Named as a tradeoff, not a defect: the brief says latency is not a concern. It is the reason `--scripts-only` exists. |
+| 10 | `ionic_vs_covalent` is measurably the hardest concept: 3/5 first-attempt (vs 5/5 for the other two), longest durations, highest cost. | Low | Both G2 rejections in the whole run landed here. Two `VisualType`s and a comparison table make it the most constrained prompt. Worth stating in the README rather than averaging away. |
 
 ---
 
@@ -154,5 +156,16 @@ from a healthy one.
 | Named failures reach the API | Parametrised over all five stage codes through the real runner |
 | Cost is metered, retries included | `test_cost.py` (16 tests) + a live manifest showing tokens, calls and both totals |
 
-**Not yet proven:** that any of this is *repeatable*. Four live calls is not a
-distribution. That is what round 9 is for.
+### What the 15-run harness added
+
+| Claim | Evidence |
+|---|---|
+| Generation is *repeatable*, not lucky once | 15/15 completed, 0 failed, 0 degraded, every duration inside 45–90s |
+| The retry loop is load-bearing, not decoration | `G2/narration_length` rejected 2 scripts; both retries passed and neither job degraded. Without the retry those two are fallbacks |
+| Cost is stable, not a lucky sample | $0.0151–$0.0231 production estimate per video; spread is 1.5×, not an order of magnitude |
+| The fallback is a real path, not a hope | Still 0 uses in production conditions — proven only by `test_a_broken_model_still_delivers_a_playable_video`, which is the correct way to prove it |
+
+**Still not proven:** anything about a fourth concept, a different model, or
+sustained load. Fifteen runs is a distribution, not a guarantee — and R8's
+question about G1/G3/G4 is now answered in words rather than by a zero
+(§ the gate table in `reports/reliability.md`).
