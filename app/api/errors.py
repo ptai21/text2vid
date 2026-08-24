@@ -17,6 +17,7 @@ from __future__ import annotations
 from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
+from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from app.concepts.aliases import ResolutionError
 from app.logging import get_logger
@@ -43,6 +44,19 @@ def not_found(job_id: str) -> APIError:
     return APIError(404, "not_found", f"No job with id {job_id}.")
 
 
+_ROUTING_CODES = {404: "not_found", 405: "method_not_allowed"}
+
+
+def _routing_message(request: Request, exc: StarletteHTTPException) -> str:
+    """Starlette's own text is "Not Found" - true, but it does not say what
+    was not found. The envelope is the only thing a client sees."""
+    if exc.status_code == 404:
+        return f"No route matches {request.method} {request.url.path}."
+    if exc.status_code == 405:
+        return f"{request.method} is not allowed on {request.url.path}."
+    return str(exc.detail)
+
+
 def register_handlers(app: FastAPI) -> None:
     @app.exception_handler(ResolutionError)
     async def _resolution(request: Request, exc: ResolutionError) -> JSONResponse:
@@ -57,6 +71,25 @@ def register_handlers(app: FastAPI) -> None:
         return JSONResponse(
             status_code=exc.status_code,
             content=envelope(exc.code, exc.message, **exc.extra),
+        )
+
+    @app.exception_handler(StarletteHTTPException)
+    async def _starlette_http(
+        request: Request, exc: StarletteHTTPException
+    ) -> JSONResponse:
+        """Unknown path, wrong verb, unreadable body.
+
+        Starlette answers these in the router, before any route function
+        runs, so they never reach `APIError` and came back as
+        `{"detail": ...}` - the one shape that escaped SPEC.md §5's
+        "every non-2xx uses one shape".
+        """
+        return JSONResponse(
+            status_code=exc.status_code,
+            content=envelope(
+                _ROUTING_CODES.get(exc.status_code, "invalid_request"),
+                _routing_message(request, exc),
+            ),
         )
 
     @app.exception_handler(RequestValidationError)

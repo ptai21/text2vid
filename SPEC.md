@@ -228,6 +228,11 @@ Every non-2xx uses one shape:
 Tracebacks are never returned. `internal_error` returns a generic message and logs the
 detail with the `job_id`.
 
+**Every** non-2xx, including the two the router raises before any route function runs:
+an unknown path is `404 not_found`, an unrecognised verb is `405 method_not_allowed`.
+Both carry the method and path in `message`, because "Not Found" does not say what was
+not found.
+
 ---
 
 ## 6. Concept registry

@@ -278,6 +278,60 @@ async def test_an_unknown_job_is_404_with_the_error_envelope(build):
     assert response.json()["error"]["code"] == "not_found"
 
 
+async def test_an_unknown_path_uses_the_error_envelope(build):
+    """Starlette answers an unknown path in the router, before any route
+    function runs. Until a handler was registered for it the body came back
+    as `{"detail": "Not Found"}` - a second shape, which SPEC.md §5 forbids.
+    """
+    harness = build(completing())
+    async with harness.client() as client:
+        response = await client.get("/nope")
+
+    assert response.status_code == 404
+    body = response.json()
+    assert body["error"]["code"] == "not_found"
+    assert "GET /nope" in body["error"]["message"]
+    assert "detail" not in body
+
+
+async def test_a_wrong_method_uses_the_error_envelope(build):
+    harness = build(completing())
+    async with harness.client() as client:
+        response = await client.request("DELETE", "/videos")
+
+    assert response.status_code == 405
+    assert response.json()["error"]["code"] == "method_not_allowed"
+
+
+@pytest.mark.parametrize(
+    "method,path,body",
+    [
+        ("GET", "/nope", None),                       # router: unknown path
+        ("DELETE", "/videos", None),                  # router: wrong verb
+        ("GET", "/videos/does-not-exist", None),      # APIError
+        ("POST", "/videos", {}),                      # RequestValidationError
+        ("POST", "/videos", {"query": "hi"}),         # ResolutionError
+        ("POST", "/videos", {"query": "What is photosynthesis?"}),
+        ("GET", "/videos?limit=500", None),           # query validation
+    ],
+)
+async def test_every_error_the_api_can_produce_has_one_shape(
+    build, method, path, body
+):
+    """SPEC.md §5: "Every non-2xx uses one shape." Stated as one sentence in
+    the spec, so asserted as one test - across all four handlers plus the two
+    the router raises on its own."""
+    harness = build(completing())
+    async with harness.client() as client:
+        response = await client.request(method, path, json=body)
+
+    assert response.status_code >= 400
+    payload = response.json()
+    assert set(payload) == {"error"}, f"{method} {path} escaped the envelope"
+    assert isinstance(payload["error"]["code"], str)
+    assert payload["error"]["message"]
+
+
 async def test_failure_detail_is_never_returned_to_a_client(build):
     """SPEC.md §3: `detail` is internal, logged not returned."""
     harness = build(exploding())
