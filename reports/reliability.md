@@ -10,6 +10,12 @@ harness instead, or the numbers stop meaning anything.
 - Model: `gemini-3.5-flash-lite`
 - Wall time: 14.0 min
 
+> **Wall times below predate the round-10 removal of the encoder zoom.** Durations,
+> costs, gate counts and pass rates are driven by audio and by the gates, so they are
+> unaffected; only the per-run `Wall` column is now pessimistic. A rebuilt 63.3s
+> `ph_scale` video muxes in 11.5s against the 35.4s mean measured here. Re-run the
+> harness to refresh the column.
+
 ## Per concept
 
 | Concept | Runs | First-attempt pass | Needed retry | Degraded | Failed | Duration min/med/max | Mean cost |

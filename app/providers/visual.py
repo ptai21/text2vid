@@ -8,7 +8,7 @@ never needs a retry, a gate tuned by feel, or a second opinion.
 
 **One PNG per scene. Five `savefig` calls per video.** Every frame matplotlib
 draws is a frame ffmpeg could have produced for free, so all motion - the
-crossfades and the slow zoom - is deferred to the encoder (§9.4). The
+crossfades - is deferred to the encoder (§9.4). The
 difference is a full harness pass in roughly ten minutes rather than forty.
 """
 

@@ -176,9 +176,21 @@ class TestFiltergraph:
         """SPEC.md §13. TTS output level varies between runs of the same voice."""
         assert "loudnorm" in self._graph()
 
-    def test_each_still_is_upscaled_before_the_zoom(self):
-        """Otherwise `zoompan` steps in whole source pixels and visibly stutters."""
-        assert "scale=2560:1440" in self._graph()
+    def test_no_scene_is_zoomed(self):
+        """Guards against reintroducing the tremble, which looked like polish.
+
+        `zoompan` crops in whole input pixels. A 4% ramp over a 12-second scene
+        moves the crop origin 0.136px per frame, so it holds for seven frames,
+        jumps one, holds for eight, jumps again - and that uneven rhythm reads
+        as trembling. It cannot be tuned away: one pixel per frame needs a
+        14.6x source, and a 2x source needs a 39% zoom that would crop the
+        captions off. The fix was to stop zooming, which also made the encode
+        2.2x faster.
+        """
+        graph = self._graph()
+        assert "zoompan" not in graph
+        assert "scale=1280:720" in graph, "stills go straight to output size"
+        assert "scale=2560:1440" not in graph, "no upscale left to zoom into"
 
     def test_a_single_scene_skips_the_concat(self):
         graph = self._graph(count=1)

@@ -202,6 +202,7 @@ G7 rejects a deliberately corrupted file
 **One static PNG per scene — five `savefig` calls per video, under a second total.**
 All motion comes from ffmpeg at encode time: 0.4s crossfades between scenes plus a subtle
 `zoompan` 1.00 → 1.04. No frame-by-frame animation anywhere.
+*(Round 10 removed the `zoompan` — it trembled. See Part 3 cut 1 and `SPEC.md` §9.4.)*
 
 That choice is the cost/quality answer in miniature: quality comes from theme, layout,
 typography and captions — work done once that applies to every run — while motion comes
@@ -284,7 +285,8 @@ and record the demo walkthrough.
 
 Cut in this order. Never cut upward past the line.
 
-1. `zoompan` subtle zoom → plain stills
+1. ~~`zoompan` subtle zoom → plain stills~~ — **taken in round 10**, not for time but
+   because it visibly trembled. Encode got 2.2× faster as a side effect.
 2. Crossfades → hard cuts
 3. Harness runs 5 → 3
 4. `GET /concepts` endpoint

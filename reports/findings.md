@@ -22,6 +22,12 @@ column is the interesting one.
 | 2 | `title_card` was in `allowed_visuals` but in no concept's `required_visuals`. A live `ionic_vs_covalent` run opened on `electron_transfer` and produced a valid video that **never showed the learner their own question** — breaking R6 and the settled decision in CLAUDE.md §4. | Reading a real `manifest.json` | `required_visuals=["title_card"]` on all three concepts |
 | 3 | Marking `completed` for a file with no audio stream was possible until G7 existed. | SPEC §10 review | G7 checks both streams, size and duration drift |
 
+The zoom is the sharpest of these. The 2× upscale was supposed to fix exactly
+the stutter that appeared, the code comment said so confidently, and the
+arithmetic was never checked — 2× halved the amplitude and changed nothing
+about the cause. **A mitigation reasoned correctly and never measured.** It took
+watching a finished video, then computing the per-frame crop origin, to see it.
+
 **Both #1 and #2 were invisible to the test suite.** All 325 tests were green
 before and after each. #1 could not be caught by a unit test because every
 fixture already had `params` populated — only the model's own output omitted
@@ -50,6 +56,7 @@ Found by rendering the PNGs and looking at them.
 | 10 | `log_steps`: on a linear axis the 1× bar is one percent of the 100× bar and **vanishes** — teaching nothing, in the scene whose whole job is the logarithm. | Log axis: bar tops form an even staircase, every "×10" arrow the same length |
 | 11 | `atom_pair` / `electron_transfer`: `set_aspect()` turned the electron shells into ellipses overflowing the frame. | `theme.circle()` — pre-computes the content zone's 3.111 aspect, because `set_aspect(1)` resizes the axes box and breaks the shared layout grid |
 | 12 | Title card showed the concept title three times over. | Dropped the redundant footer, rebalanced vertically |
+| 13 | **The finished video trembled.** The subtle `zoompan` 1.00→1.04 moved its crop origin 0.136px per frame, so the crop held for seven frames, jumped one pixel, held for eight, jumped again. The *unevenness* is what the eye catches — a steady drift would have been invisible. | Removed the zoom. It is not tunable: 1px/frame needs a 14.6× source (18720×10530), and a 2× source needs a 39% zoom that would crop the captions off. A subtle zoom and `zoompan` are incompatible by construction. Encode got **2.2× faster** as a side effect |
 
 ### Bugs the tests could not have found — the pattern, stated once
 
@@ -125,7 +132,7 @@ that no round claimed.
 | 6 | `edge-tts` is an unofficial endpoint. | Known, accepted | Mitigated by explicit timeout, 3× backoff, sha256 audio cache, and the `TTSProvider` seam. Must be stated in README. |
 | 7 | Gemini free tier: 5–15 RPM, ~1,000–1,500/day, and free-tier data may be used to improve Google's products. | Known, accepted | Fine for a prototype, not for real learner data. Must be stated in README. |
 | 8 | ~~The harness has not been run.~~ | Closed | 15 runs, 0 failed, 0 degraded, all 5 SPEC §15 criteria PASS. See `reports/reliability.md`. |
-| 9 | **Encoding is 77% of wall time** — muxing averages 35.4s of a ~46s job (scripting 6.9s, narrating 8.6s, rendering 1.3s). | Low | Named as a tradeoff, not a defect: the brief says latency is not a concern. It is the reason `--scripts-only` exists. |
+| 9 | **Encoding is 77% of wall time** — muxing averaged 35.4s of a ~46s job (scripting 6.9s, narrating 8.6s, rendering 1.3s). | Improved, still the largest stage | Removing the zoom (defect 13) took a rebuilt 63.3s `ph_scale` video's mux to **11.5s** and its file from ~3.3MB to 1.5MB. The harness figures above predate that change; its reliability figures — durations, costs, gate counts — are audio- and gate-driven and unaffected. |
 | 10 | `ionic_vs_covalent` is measurably the hardest concept: 3/5 first-attempt (vs 5/5 for the other two), longest durations, highest cost. | Low | Both G2 rejections in the whole run landed here. Two `VisualType`s and a comparison table make it the most constrained prompt. Worth stating in the README rather than averaging away. |
 
 ---

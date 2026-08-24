@@ -37,8 +37,8 @@ background `asyncio.Task` — the client learns about it through `GET /videos/{j
 ### Why `asyncio` and not Celery
 
 The out-of-scope list rules out a broker, but the choice would be the same without it.
-The workload is one CPU-bound stage (ffmpeg, ~35s of a ~46s job) wrapped in two I/O-bound
-ones. A `Semaphore(2)` bounds the CPU contention that actually matters; a broker would add
+The workload is one CPU-bound stage (ffmpeg — ~35s of a ~46s job when the harness ran,
+11.5s for a rebuilt 63.3s video once the zoom came out) wrapped in two I/O-bound ones. A `Semaphore(2)` bounds the CPU contention that actually matters; a broker would add
 a process boundary, a serialisation format and a failure mode without addressing it. What
 a broker *would* buy is durability across restart — and that is listed as a known limit
 rather than pretended away.
@@ -237,11 +237,21 @@ Verified on three full runs: expected 63.3 / 60.4 / 68.5s → actual 63.3 / 60.5
 `tests/test_render.py` asserts both this and the naive version it replaces, so a
 regression names itself instead of drifting the video 1.6 seconds short.
 
-Motion comes entirely from the encoder — a `zoompan` from 1.00 to 1.04 on a 2× upscaled
-source, which avoids the integer-pixel stutter a direct zoom produces. **Five renders per
-video, not one per frame.** An earlier reading of the spec implied per-scene animation at
-~900 `savefig` calls per video; five is a thousandfold less work for motion a viewer
-cannot distinguish.
+**Five renders per video, not one per frame.** An earlier reading of the spec implied
+per-scene animation at ~900 `savefig` calls per video; five is a thousandfold less work.
+The only movement is the encoder's 0.4s crossfades.
+
+There was a subtle `zoompan` too, until watching a finished video showed it trembling.
+`zoompan` crops in whole input pixels, and a 4% ramp over a 12-second scene moves its crop
+origin 0.136px per frame — so the crop holds for seven frames, jumps one, holds for eight,
+jumps again. The *unevenness* is what the eye catches; a steady drift would have been
+invisible. The 2× upscale that was supposed to fix this only halved the amplitude, and the
+code comment claiming it was smooth had never been checked against a number.
+
+It is not tunable. One pixel per frame needs a 14.6× source; a 2× source needs a 39% zoom
+that would crop the captions off. **A subtle zoom and `zoompan` are incompatible by
+construction**, so the zoom is gone — which also made the encode 2.2× faster. This is the
+build's clearest case of a mitigation that was reasoned correctly and never measured.
 
 ---
 

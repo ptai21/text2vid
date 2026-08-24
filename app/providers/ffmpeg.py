@@ -124,14 +124,15 @@ def encode_placeholder(
 # ---------------------------------------------------------------------------
 
 CROSSFADE_S = 0.4
-ZOOM_MAX = 1.04
-UPSCALE = 2
-"""The still is scaled up before `zoompan` crops back down to output size.
-
-`zoompan` computes its crop rectangle in whole input pixels. Run at 1:1 the
-4% ramp advances by less than a pixel per frame, so the crop snaps rather than
-glides and the "subtle zoom" reads as a stutter. Zooming a 2x source and
-resampling down is smooth, and costs filter time rather than encode time."""
+# There is no zoom. `zoompan` crops in whole input pixels, and a 4% ramp over a
+# 12-second scene moves its crop origin 0.136px per frame - so the crop holds
+# for seven frames, jumps one pixel, holds for eight, jumps again. That uneven
+# rhythm is what the eye reads as trembling, and no upscale fixes it: reaching
+# one pixel per frame needs a 14.6x source (18720x10530), while keeping a 2x
+# source needs a 39% zoom, which would crop 28% off every edge and cut the
+# captions in half. A subtle zoom and `zoompan` are incompatible by
+# construction. Removing it also cut encode time by 2.2x. PLAN.md Part 3
+# already ranked this the first thing to cut.
 
 CRF = 23
 PRESET = "veryfast"
@@ -184,15 +185,11 @@ def xfade_offsets(stills: Sequence[float],
     return offsets
 
 
-def _video_chain(index: int, frames: int, width: int, height: int,
-                 fps: int) -> str:
-    ramp = f"1+{ZOOM_MAX - 1:.4f}*on/{max(frames - 1, 1)}"
+def _video_chain(index: int, width: int, height: int, fps: int) -> str:
+    """One still to one constant-rate video stream. `settb` so xfade can join them."""
     return (
         f"[{index}:v]"
-        f"scale={width * UPSCALE}:{height * UPSCALE}:flags=bicubic,"
-        f"setsar=1,"
-        f"zoompan=z={ramp}:d=1:x=iw/2-(iw/zoom/2):y=ih/2-(ih/zoom/2)"
-        f":s={width}x{height}:fps={fps},"
+        f"scale={width}:{height}:flags=bicubic,setsar=1,fps={fps},"
         f"format=yuv420p,settb=AVTB[v{index}]"
     )
 
@@ -204,10 +201,7 @@ def build_filtergraph(scenes: Sequence[MuxScene], *, width: int, height: int,
     stills = still_durations([s.duration_s for s in scenes], crossfade=crossfade)
     offsets = xfade_offsets(stills, crossfade=crossfade)
 
-    parts = [
-        _video_chain(index, max(2, round(duration * fps)), width, height, fps)
-        for index, duration in enumerate(stills)
-    ]
+    parts = [_video_chain(index, width, height, fps) for index in range(count)]
 
     current = "v0"
     for index, offset in enumerate(offsets, start=1):

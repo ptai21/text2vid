@@ -299,7 +299,7 @@ without building a fourth.
 | **Gemini free tier.** | 5–15 RPM, ~1,000–1,500 requests/day, and **free-tier data may be used to improve Google's products.** Fine for a prototype; not acceptable for real learner data. A paid tier changes the terms, not the code. |
 | **Jobs are in memory.** | A restart loses them. `JobRepository` is a Protocol and `InMemoryJobRepository` is one implementation of it; the signatures are already async so a real database never touches a call site. |
 | **Artifacts are local files.** | Single node. Same story — `ArtifactStore` is a Protocol. |
-| **Encoding dominates wall time.** | ~35s of a ~46s job. A tradeoff, not a defect: the brief states latency is not a concern. `scripts/harness.py --scripts-only` exists so reliability can be sampled at high N without paying it. |
+| **Encoding dominates wall time.** | It was ~35s of a ~46s job when the harness ran; removing the zoom cut a rebuilt 63.3s video's mux to **11.5s**. Still the largest stage, and still a tradeoff rather than a defect — the brief states latency is not a concern. `scripts/harness.py --scripts-only` exists so reliability can be sampled at high N without paying it. |
 | **Paraphrases outside the alias sets are rejected.** | Deliberate. A clear "not supported, here are the three that are" beats an LLM router guessing wrong, adding cost and adding a second source of non-determinism at the front door. |
 
 ---

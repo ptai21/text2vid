@@ -362,10 +362,10 @@ audio (§9).
 | Type | Params | Motion |
 |---|---|---|
 | `title_card` | — (query + concept title injected by renderer) | no |
-| `ph_scale_bar` | `markers: float[0..14]`, ≤4 | static frame + encoder zoom |
+| `ph_scale_bar` | `markers: float[0..14]`, ≤4 | no |
 | `log_steps` | `from_ph: int`, `to_ph: int` | no |
 | `atom_pair` | `left: str`, `right: str`, `shared_pairs: 1..3` | no |
-| `energy_curve` | `min_distance: float`, `label: str` | static frame + encoder zoom |
+| `energy_curve` | `min_distance: float`, `label: str` | no |
 | `electron_transfer` | `donor: str`, `acceptor: str` | no |
 | `side_by_side_comparison` | `left_title`, `right_title`, `rows: [[str,str]]` 2–4 | no |
 | `summary_card` | `points: str[]` 2–4, each ≤10 words | no |
@@ -443,8 +443,18 @@ Every frame carries the burned-in caption (§13).
 
 ### 9.4 Muxing
 
-Per scene: one still + audio → segment, held for the scene's measured duration with a
-subtle `zoompan` 1.00 → 1.04. Then concat with **0.4s crossfades** → single MP4.
+Per scene: one still + audio → segment, held for the scene's measured duration. Then
+concat with **0.4s crossfades** → single MP4.
+
+**There is no zoom, and the reason is arithmetic rather than taste.** `zoompan` crops in
+whole input pixels. A 4% ramp over a 12-second scene moves its crop origin 0.136px per
+frame, so the crop holds for seven frames, jumps one pixel, holds for eight, jumps again —
+and that *uneven* rhythm is what the eye reads as trembling. It cannot be tuned out:
+reaching one pixel per frame needs a 14.6× source (18720×10530), while keeping a 2×
+source needs a 39% zoom that would crop 28% off every edge and cut the captions in half.
+A subtle zoom and `zoompan` are incompatible by construction. Removing it also made the
+encode **2.2× faster** and the file 2.25× smaller. `PLAN.md` Part 3 had already ranked
+this the first thing to cut.
 H.264 `yuv420p`, AAC 128k, 1280×720, 30fps, `loudnorm` applied to the audio track.
 `stderr` is always captured and, on failure, becomes `failure.detail`.
 
@@ -591,8 +601,9 @@ actually earned.
   off**.
 - **0.4s crossfades** between scenes. Hard cuts between static frames read as a
   slideshow.
-- **No per-scene animation.** Movement comes from the encoder's crossfades and slow
-  zoom, which cost nothing per scene and apply uniformly to every concept.
+- **No per-scene animation and no zoom.** The only movement is the encoder's 0.4s
+  crossfades. Static frames are also the right call for the content: these are diagrams
+  carrying text, and a drifting caption is harder to read, not more alive.
 - **`loudnorm` plus 0.4s trailing silence per scene.** Educational narration without
   pauses feels rushed.
 - Output: 1280×720, 30fps, ~800 kbps (flat graphics need no more).
