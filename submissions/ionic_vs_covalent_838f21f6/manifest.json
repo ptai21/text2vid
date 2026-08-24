@@ -1,9 +1,9 @@
 {
-  "job_id": "081968c7-f1ef-4e57-ac1a-de453720b71a",
+  "job_id": "838f21f6-6fbf-4d88-a8bc-194801c9c51f",
   "query": "What is the difference between ionic and covalent bonding?",
   "concept": "ionic_vs_covalent",
   "degraded": false,
-  "attempts": 1,
+  "attempts": 2,
   "gates": [
     {
       "gate": "G1",
@@ -12,81 +12,92 @@
     },
     {
       "gate": "G2",
+      "passed": false,
+      "attempt": 1,
+      "reason": "narration_length: Scene s3 has 23 words; each scene must be 25-38 words."
+    },
+    {
+      "gate": "G1",
       "passed": true,
-      "attempt": 1
+      "attempt": 2
+    },
+    {
+      "gate": "G2",
+      "passed": true,
+      "attempt": 2
     },
     {
       "gate": "G3",
       "passed": true,
-      "attempt": 1
+      "attempt": 2
     },
     {
       "gate": "G4",
       "passed": true,
-      "attempt": 1
+      "attempt": 2
     }
   ],
   "scenes": [
     {
       "scene_id": "s1",
       "visual": "title_card",
-      "audio_s": 14.45,
-      "frames": 445,
+      "audio_s": 16.97,
+      "frames": 521,
       "cached_audio": false
     },
     {
       "scene_id": "s2",
-      "visual": "side_by_side_comparison",
-      "audio_s": 13.92,
-      "frames": 442,
+      "visual": "electron_transfer",
+      "audio_s": 13.9,
+      "frames": 441,
       "cached_audio": false
     },
     {
       "scene_id": "s3",
       "visual": "side_by_side_comparison",
-      "audio_s": 14.4,
-      "frames": 456,
+      "audio_s": 17.88,
+      "frames": 560,
       "cached_audio": false
     },
     {
       "scene_id": "s4",
       "visual": "side_by_side_comparison",
-      "audio_s": 14.66,
-      "frames": 464,
+      "audio_s": 13.94,
+      "frames": 442,
       "cached_audio": false
     },
     {
       "scene_id": "s5",
-      "visual": "side_by_side_comparison",
-      "audio_s": 14.11,
-      "frames": 447,
+      "visual": "summary_card",
+      "audio_s": 16.01,
+      "frames": 504,
       "cached_audio": false
     }
   ],
   "video": {
-    "duration_s": 73.6,
-    "size_bytes": 1804902,
+    "duration_s": 80.7,
+    "size_bytes": 2039001,
     "has_audio": true,
     "has_video": true
   },
   "cost": {
-    "llm_usd": 0.0021983000000000003,
+    "llm_usd": 0.0040302,
     "tts_usd": 0.0,
-    "total_usd": 0.0021983000000000003,
-    "production_estimate_usd": 0.020846299999999998
+    "total_usd": 0.0040302,
+    "production_estimate_usd": 0.0244702
   },
   "tokens": {
-    "llm_calls": 1,
-    "prompt": 961,
-    "output": 764,
+    "llm_calls": 2,
+    "prompt": 2034,
+    "output": 1368,
     "thinking": 0
   },
   "timings": {
-    "scripting": 3.04,
-    "narrating": 11.65,
-    "rendering": 0.65,
-    "muxing": 10.53
+    "scripting": 6.94,
+    "narrating": 7.51,
+    "rendering": 0.66,
+    "muxing": 11.82
   },
   "model": "gemini-3.5-flash-lite",
-  "created_at": "2026-08-24T05:40:38.003429+00:00"
+  "created_at": "2026-08-24T08:26:04.562554+00:00"
 }

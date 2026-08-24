@@ -1,0 +1,86 @@
+{
+  "concept": "ionic_vs_covalent",
+  "scenes": [
+    {
+      "scene_id": "s1",
+      "heading": "How atoms bond together",
+      "narration": "Atoms connect because they want stable outer electron shells. During ionic bonding, one atom completely transfers electrons to another. Meanwhile, covalent bonding happens when atoms hold hands by firmly sharing those valuable electrons.",
+      "visual": {
+        "type": "title_card",
+        "params": {}
+      }
+    },
+    {
+      "scene_id": "s2",
+      "heading": "Who takes part",
+      "narration": "Ionic bonds usually form between a metal and a non-metal because their attraction pulls hard enough for a full transfer. Covalent bonds form when two non-metals meet, as neither can force a complete electron transfer.",
+      "visual": {
+        "type": "electron_transfer",
+        "params": {
+          "donor": "Na",
+          "acceptor": "Cl"
+        }
+      }
+    },
+    {
+      "scene_id": "s3",
+      "heading": "Lattice versus molecules",
+      "narration": "The resulting products look very different from each other. Ionic substances build huge alternating crystal lattices packed tightly together with opposite charges. Covalent substances form separate discrete molecules containing only a few tightly bound individual atoms.",
+      "visual": {
+        "type": "side_by_side_comparison",
+        "params": {
+          "left_title": "Ionic",
+          "right_title": "Covalent",
+          "rows": [
+            [
+              "Crystal lattice",
+              "Discrete molecules"
+            ],
+            [
+              "Metal and non-metal",
+              "Non-metals only"
+            ]
+          ]
+        }
+      }
+    },
+    {
+      "scene_id": "s4",
+      "heading": "Melting points and electricity",
+      "narration": "Because those ionic lattices hold on tightly, they need massive heat to melt and they conduct electricity when dissolved in water. Covalent substances feature low melting points and typically do not conduct electricity at all.",
+      "visual": {
+        "type": "side_by_side_comparison",
+        "params": {
+          "left_title": "Ionic Properties",
+          "right_title": "Covalent Properties",
+          "rows": [
+            [
+              "High melting point",
+              "Low melting point"
+            ],
+            [
+              "Conducts when dissolved",
+              "Does not conduct"
+            ]
+          ]
+        }
+      }
+    },
+    {
+      "scene_id": "s5",
+      "heading": "Sodium chloride and water",
+      "narration": "As a worked example, sodium chloride forms an ionic crystal lattice with high melting points and conducting properties. Water molecules form covalently, staying together as small units with low melting points that never conduct electricity.",
+      "visual": {
+        "type": "summary_card",
+        "params": {
+          "points": [
+            "Ionic transfers electrons",
+            "Covalent shares electrons",
+            "Sodium chloride is ionic",
+            "Water is covalent"
+          ]
+        }
+      }
+    }
+  ]
+}
