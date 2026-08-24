@@ -11,6 +11,7 @@ the chain would quietly desynchronise every video.
 
 from __future__ import annotations
 
+import asyncio
 import json
 from pathlib import Path
 
@@ -714,9 +715,9 @@ def test_a_corrupted_fallback_is_caught_at_load_time(tmp_path):
 # Named failures reaching the job — R7
 # ---------------------------------------------------------------------------
 
-async def make_runner(generate):
+async def make_runner(generate, *, timeout_s: float = 10):
     repository = InMemoryJobRepository()
-    runner = JobRunner(repository, generate, max_concurrent=1, timeout_s=10)
+    runner = JobRunner(repository, generate, max_concurrent=1, timeout_s=timeout_s)
     job = Job.create("How does the pH scale work?")
     job.concept = "ph_scale"
     await repository.create(job)
@@ -759,6 +760,27 @@ async def test_an_unexpected_exception_is_still_an_internal_error():
     job = await make_runner(generate)
     assert job.failure.code == "internal_error"
     assert job.status == "failed"
+
+
+async def test_a_job_that_runs_over_budget_is_named_a_timeout():
+    """A hung job is not a bug, and a client has to be able to tell.
+
+    `code` is the machine-readable field. Reporting `internal_error` here
+    would tell an automated client "the server is broken, do not retry" about
+    the single most retryable failure the pipeline has. R7 asks for named
+    failures, and this was the last unnamed one.
+    """
+    async def generate(job, report_stage):
+        await report_stage("muxing")
+        await asyncio.sleep(5)
+
+    job = await make_runner(generate, timeout_s=0.05)
+
+    assert job.status == "failed"
+    assert job.failure.code == "timeout"
+    assert job.failure.stage == "muxing", "the stage it hung in is preserved"
+    assert "time budget" in job.failure.message
+    assert "JOB_TIMEOUT_S" in job.failure.detail
 
 
 # ---------------------------------------------------------------------------

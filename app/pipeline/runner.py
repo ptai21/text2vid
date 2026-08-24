@@ -119,11 +119,16 @@ class JobRunner:
                      degraded=job.degraded)
 
         except asyncio.TimeoutError:
+            # Named rather than left to the `internal_error` default. A hung
+            # job and a bug need different responses from a client - a timeout
+            # is the most retryable failure there is - and `code` is the field
+            # a client switches on.
             log.warning("job.timeout", job_id=job.job_id, timeout_s=self._timeout_s)
             await self._fail(
                 job,
                 "Generation exceeded the time budget.",
                 f"exceeded JOB_TIMEOUT_S={self._timeout_s}",
+                code="timeout",
             )
 
         except StageFailure as exc:

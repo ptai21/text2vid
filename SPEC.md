@@ -93,6 +93,7 @@ requires.
 | `render_failed` | rendering | Renderer raised or produced no frame |
 | `mux_failed` | muxing | ffmpeg non-zero exit |
 | `artifact_invalid` | muxing | G7 rejected the produced file |
+| `timeout` | any | Exceeded `JOB_TIMEOUT_S`. Distinct from `internal_error` on purpose: a hung job is retryable, a bug is not |
 | `internal_error` | any | Unhandled — always logged with traceback |
 
 ---

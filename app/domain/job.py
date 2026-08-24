@@ -34,6 +34,7 @@ FailureCode = Literal[
     "render_failed",
     "mux_failed",
     "artifact_invalid",
+    "timeout",
     "internal_error",
 ]
 

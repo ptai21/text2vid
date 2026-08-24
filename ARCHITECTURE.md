@@ -80,9 +80,14 @@ gets told the model did not produce it.
 
 The orchestrator raises `StageFailure(code, stage, message, detail)`; the runner records
 the code on the job. This exists because the first version hardcoded `internal_error` for
-everything, which left five of nine `FailureCode` values as dead code and made R7
-("failures are named and explicit") true only on paper. The generic catch-all is still
-there, one layer below — and now it genuinely means *bug*, which is the only thing it
+everything, which left five of the then-nine `FailureCode` values as dead code and made R7
+("failures are named and explicit") true only on paper.
+
+The last unnamed one was the timeout, found while fact-checking the README against the
+code: `JobRunner` caught `asyncio.TimeoutError` and called `_fail` without a code, so it
+took the `internal_error` default. The message and the log line were always right — only
+the machine-readable field was wrong, which is the harder kind to notice. `timeout` is now
+its own code, and the generic catch-all genuinely means *bug*, which is the only thing it
 should ever mean.
 
 ---

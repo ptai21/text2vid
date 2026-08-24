@@ -95,15 +95,16 @@ exist. `409` plus the current `status` and `stage` tells it to wait, and roughly
 along it is. The brief says latency is not the concern — clearly exposing the waiting
 state is.
 
-**Every failure is named.** One error envelope everywhere, nine distinct `FailureCode`
+**Every failure is named.** One error envelope everywhere, ten distinct `FailureCode`
 values — `invalid_request`, `unsupported_concept` and `ambiguous_query` at the door, then
 `script_unavailable`, `tts_failed`, `render_failed`, `mux_failed` and `artifact_invalid`
-from the five pipeline stages, with `internal_error` as the catch-all that means *bug*.
-Tracebacks are never returned; they are logged against the `job_id`.
+from the five pipeline stages, plus `timeout`, with `internal_error` as the catch-all that
+means *bug* and nothing else. Tracebacks are never returned; they are logged against the
+`job_id`.
 
-One honest exception: a job that exceeds `JOB_TIMEOUT_S` currently reports
-`internal_error` too. A timeout is a foreseen condition, not a bug, so it should carry its
-own code — noted in [findings.md](reports/findings.md) rather than quietly conflated.
+`timeout` is separate from `internal_error` on purpose. `code` is the field an automated
+client switches on, and a hung job is the most retryable failure the pipeline has —
+reporting it as `internal_error` would tell that client the opposite.
 
 Full request/response shapes: [SPEC.md §5](SPEC.md).
 

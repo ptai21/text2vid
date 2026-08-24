@@ -403,6 +403,14 @@ async def test_an_exception_escaping_the_task_fails_the_job(build):
 
 
 async def test_job_timeout_is_enforced(build):
+    """Asserted `internal_error` until round 10, which was never a decision.
+
+    Round 4 wrote this line because `FailureCode` had no `timeout` member yet,
+    so the runner had nothing else to report. SPEC.md section 3 has always
+    defined `internal_error` as *unhandled* - and a timeout is handled, in a
+    named `except` block - so the old assertion recorded an accident rather
+    than a contract. Changing it followed a spec change, not a red test.
+    """
     harness = build(hanging(), timeout_s=0.05)
 
     async with harness.client() as client:
@@ -411,7 +419,7 @@ async def test_job_timeout_is_enforced(build):
         detail = (await client.get(f"/videos/{job_id}")).json()
 
     assert detail["status"] == "failed"
-    assert detail["failure"]["code"] == "internal_error"
+    assert detail["failure"]["code"] == "timeout"
 
 
 async def test_a_timed_out_job_is_never_left_running(build):
