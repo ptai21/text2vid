@@ -5,7 +5,7 @@ came apart. Kept separate from [findings.md](findings.md): that file records
 *defects*, this one records *divergence*. A plan that matched reality perfectly
 would either be a very good plan or a record nobody checked.
 
-Read alongside `git log` — 21 commits, each carrying the command it was gated on
+Read alongside `git log` — 23 commits, each carrying the command it was gated on
 and the output that command produced.
 
 ---
@@ -14,11 +14,11 @@ and the output that command produced.
 
 | | |
 |---|---|
-| Application | 4,583 lines across `app/` |
-| Tests | 3,315 lines — **329 fast** (~6s, offline, quota-free) + **12 slow** |
+| Application | 4,616 lines across `app/` |
+| Tests | 3,369 lines — **338 fast** (~11s, offline, quota-free) + **12 slow** |
 | Scripts | 1,087 lines — `smoke`, `demo`, `render_demo`, `harness` |
-| Documentation | 2,492 lines across 6 files |
-| Commits | 21, Conventional Commits, each with an observed `Gate:`/`Result:` |
+| Documentation | 2,707 lines across 9 files |
+| Commits | 23, Conventional Commits, each with an observed `Gate:`/`Result:` |
 | Deliverables | 3 videos, each with `script.json`, `manifest.json`, `query.txt` |
 
 Every one of the ten rounds completed and was committed. No round failed its
@@ -74,6 +74,13 @@ Four. Each was raised, decided, then implemented — spec first, code second.
 | `StageFailure` carries a `FailureCode` | `runner.py` hardcoded `internal_error`, leaving five of nine codes as dead code and making R7 true only on paper | `runner.py`, round 8 |
 | `timeout` added to `FailureCode` | A hung job reported `internal_error` — the code reserved for bugs — telling an automated client not to retry the *most* retryable failure there is | SPEC §3, domain enum, 2 tests |
 | `GET /videos/{job_id}/script` | SPEC §12 declares a three-file bundle; only two were reachable over HTTP. The missing one is the output of the sole non-deterministic stage | SPEC §5, `routes.py`, `demo.py`, 3 tests |
+
+A fifth was found after round 10, by probing the running service rather than by
+reading code: `SPEC.md` §5 says *"Every non-2xx uses one shape"*, but Starlette answers
+an unknown path and an unrecognised verb **in the router**, before any route function
+runs. Those two replies never reached `APIError` and came back as `{"detail": ...}`.
+Fixed with one handler, and the spec sentence is now a parametrised test across all
+four handlers plus the two the router raises alone.
 
 Plus one **rewrite** rather than an addition: `SPEC.md` §7/§9.3/§9.4/§13 were
 rewritten before round 7 because the spec implied per-scene animation (~900
@@ -134,6 +141,12 @@ Not divergence by choice — places the plan could not have worked as written.
    G1–**G7**. Two later rounds had to reclaim it.
 5. **`tests/test_contracts.py` and `app/domain/script.py` were named in the
    layout but owned by no round.**
+6. **`CLAUDE.md` §7 budgets the fast suite at "under ~3s".** It runs in ~11s, of which
+   **3.5s is collection** — importing matplotlib, FastAPI and `google-genai`. The
+   slowest single test is 0.39s and the eight slowest together are ~2s, so this is not
+   slow tests, it is import cost. The budget was written before round 1, and matplotlib
+   arrived in round 7; it has been unreachable ever since. Recorded here rather than
+   edited into `CLAUDE.md`, whose timestamps are evidence (§9 of that file).
 
 The pattern is consistent: `PLAN.md` allocated *implementation* files carefully
 and *verification* files barely at all. Every one of these was found by trying to
@@ -191,7 +204,9 @@ reliability than fifteen clean runs ever could.
 
 | | Owner |
 |---|---|
-| Demo recording covering all three concepts | you |
-| Push, then grant GitHub read access to the three evaluator addresses | you |
+| Demo walkthrough covering all three concepts | you |
+| Grant GitHub read access to the three evaluator addresses (pushed) | you |
+| Upload the working-session recording, verify the share link plays | you |
+| Zip excluding `.venv/`, `__pycache__/`, `artifacts/`, `.git/` and **`.env`** | you |
 | Visual repetition (`max_repeats_per_visual`) — deliberately **not** gated on one observation | open, low |
 | `MAX_TOTAL_WORDS` left at 190 — the ceiling never bound; the model undershoots instead | closed, watch only |

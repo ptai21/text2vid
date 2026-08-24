@@ -47,6 +47,7 @@ rules are enforced; only looking at the artifact proves the rules are right.**
 | 6 | Two non-JSON lines at startup: uvicorn logged before `lifespan` ran `configure_logging`. | Piping stdout through a JSON parser | Moved into `create_app()` so it runs at import |
 | 7 | `LocalArtifactStore.write_text` was not in the SPEC §12 Protocol, so the stub depended on the concrete class — quietly voiding the "swapping is a one-class change" claim. | Self-review against SPEC | Removed; publishing writes a temp file and calls `put()` |
 | 8 | `ModuleNotFoundError: app.main` reported as an environment problem. It was not — the file had simply never been written. | Reading the traceback instead of the error | Round 1 |
+| 17 | `SPEC.md` §5 promises *"every non-2xx uses one shape"*, but Starlette answers an unknown path and an unrecognised verb **in the router**, before any route function runs. Those two never reached `APIError`, so `GET /nope` returned `{"detail":"Not Found"}` — a second shape, and the one an evaluator hits first by mistyping a URL. | Curling a running server with deliberately wrong requests | One `StarletteHTTPException` handler. The spec sentence is now a parametrised test over all four handlers plus the two the router raises alone |
 
 ### Visual defects — none of which any test could see
 
@@ -64,7 +65,9 @@ Found by rendering the PNGs and looking at them.
 
 Three of the four most serious problems in this build were invisible to a green
 test suite, and all three were found by looking at something real: a live
-response, a rendered PNG, a `manifest.json`. `tests/test_contracts.py` (round
+response, a rendered PNG, a `manifest.json`. Bug 17 is the fourth instance and
+the cheapest: 329 tests were green, and one `curl` to a URL that does not exist
+found a promise the spec had made and the code had not kept. `tests/test_contracts.py` (round
 10) exists because of that pattern — it is the only suite that can fail for a
 reason nobody anticipated. It earned its place on its **first run**, producing a
 115-word script that the 15-run harness never saw (open issue 1).
